@@ -1,13 +1,13 @@
-#include "math.h"
+#include "qmath.h"
 #include <assert.h>
 
-static complex_t ZERO = {0, 0};
-static complex_t ONE = {1, 0};
-static complex_t I = {0, 1};
-static complex_t A = {1, 3};
-static complex_t B = {3, 4};
-static complex_t A_PLUS_B = {4, 7};
-static complex_t A_TIMES_B = {-9, 13};
+static cart_t ZERO = {0, 0};
+static cart_t ONE = {1, 0};
+static cart_t I = {0, 1};
+static cart_t A = {1, 3};
+static cart_t B = {3, 4};
+static cart_t A_PLUS_B = {4, 7};
+static cart_t A_TIMES_B = {-9, 13};
 
 void complex_addition() {
     assert(complex_equal(complex_add(A, B), A_PLUS_B) == TRUE);
