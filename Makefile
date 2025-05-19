@@ -10,3 +10,6 @@ tests : $(t_objects)
 
 clean:
 	rm qsim $(objects)
+
+clean_tests:
+	rm tests $(t_objects)
