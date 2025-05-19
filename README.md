@@ -14,6 +14,7 @@ all fundamental code is self-written. no external libraries for linear algebra o
 
 ## todo
 
+- [ ] a lot of linear algebra
 - [ ] implement a qubit
 - [ ] implement a quantum gate
     - [ ] application of quantum gate on qubit
