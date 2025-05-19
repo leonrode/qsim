@@ -11,6 +11,9 @@ typedef enum {
     TRUE
 } bool_t;
 
+// here because it is useful for intermediate operations
+// but i think we'll rely on doing all 
+// out-facing computations in polar 
 typedef struct {
     real_t a;
     real_t b;
@@ -22,9 +25,9 @@ typedef struct {
 } polar_t; // re^(i*theta)
 
 
-bool_t complex_equal(cart_t a, cart_t b);
-cart_t complex_add(cart_t a, cart_t b);
-cart_t complex_mult(cart_t a, cart_t b);
+bool_t cart_equal(cart_t a, cart_t b);
+cart_t cart_add(cart_t a, cart_t b);
+cart_t cart_mult(cart_t a, cart_t b);
 
 polar_t cart_to_polar(cart_t a);
 cart_t polar_to_cart(polar_t a);
