@@ -5,6 +5,7 @@
 #ifndef QMATH_H
 #define QMATH_H
 
+
 #define PI 3.14159265
 #define REAL_EQ_ERR 0.00000001;
 
@@ -43,7 +44,10 @@ bool_t polar_equal(polar_t a, polar_t b);
 polar_t polar_add(polar_t a, polar_t b);
 polar_t polar_mult(polar_t a, polar_t b);
 
+polar_t reduce_polar(polar_t a);
+
 bool_t equals(real_t a, real_t b);
+
 
 
 #endif

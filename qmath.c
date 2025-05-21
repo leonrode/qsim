@@ -25,7 +25,7 @@ polar_t cart_to_polar(cart_t a) {
 
     polar_t ret = { r, angle };
 
-    return ret;
+    return reduce_polar(ret);
 }
 
 cart_t polar_to_cart(polar_t a) {
@@ -50,12 +50,29 @@ polar_t polar_add(polar_t a, polar_t b) {
 
     cart_t a_b_sum = cart_add(a_cart, b_cart);
 
-    return cart_to_polar(a_b_sum);
+    return reduce_polar(cart_to_polar(a_b_sum));
 }
 
 polar_t polar_mult(polar_t a, polar_t b) {
     polar_t prod = { a.r * b.r, a.theta + b.theta };
-    return prod;
+
+
+    return reduce_polar(prod);
+}
+
+/**
+ * static polar_t A_UNRED = {1, 3*PI + 0.5};
+ * static polar_t A_RED = {1, 3.6415926536};
+ */
+polar_t reduce_polar(polar_t a) {
+    // puts a's angle between [0, 2pi)
+
+    real_t theta_effective = a.theta;
+    if (theta_effective < 0) theta_effective *= -1;
+
+    theta_effective = theta_effective - (2 * PI * floor(theta_effective / (2 * PI)));
+
+    return (polar_t) {a.r, theta_effective};
 }
 
 bool_t equals(real_t a, real_t b) {

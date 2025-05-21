@@ -1,5 +1,6 @@
-#include "qmath.h"
 #include <assert.h>
+#include "qmath.h"
+#include "utils.h"
 
 static cart_t ZERO = {0, 0};
 static cart_t ONE = {1, 0};
@@ -11,6 +12,9 @@ static cart_t A_TIMES_B = {-9, 13};
 
 static polar_t ONE_POLAR = {1, 0};
 static polar_t I_POLAR = {1, PI/2};
+
+static polar_t A_UNRED = {1, 3*PI + 0.5};
+static polar_t A_RED = {1, 3.6415926536};
 
 
 void cart_addition() {
@@ -35,6 +39,10 @@ void polar_equality() {
     assert(polar_equal(I_POLAR, ONE_POLAR) == FALSE);
 }
 
+void polar_reduction() {
+    assert(polar_equal(reduce_polar(A_UNRED), A_RED) == TRUE);
+}
+
 void complex_conversions() {
     assert(polar_equal(ONE_POLAR, cart_to_polar(ONE)) == TRUE);
     assert(polar_equal(ONE_POLAR, cart_to_polar(I)) == FALSE);
@@ -44,5 +52,7 @@ int main() {
     cart_addition();
     cart_multiplication();
     polar_equality();
+
+    polar_reduction();
     complex_conversions();
 }
