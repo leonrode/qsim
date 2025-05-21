@@ -20,12 +20,17 @@ typedef enum {
 typedef struct {
     real_t a;
     real_t b;
-} cart_t; // a + bi
+} cart_t; // a + bi3
 
 typedef struct {
     real_t r;
     real_t theta;
 } polar_t; // re^(i*theta)
+
+typedef union {
+    polar_t p;
+    cart_t c;
+} complex_t; // complex number is either polar or cartesian
 
 bool_t cart_equal(cart_t a, cart_t b);
 cart_t cart_add(cart_t a, cart_t b);

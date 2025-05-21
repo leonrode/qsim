@@ -36,9 +36,8 @@ void polar_equality() {
 }
 
 void complex_conversions() {
-
     assert(polar_equal(ONE_POLAR, cart_to_polar(ONE)) == TRUE);
-
+    assert(polar_equal(ONE_POLAR, cart_to_polar(I)) == FALSE);
 }
 
 int main() {
