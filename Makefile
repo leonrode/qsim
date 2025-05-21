@@ -1,6 +1,6 @@
-objects = main.o qmath.o
+objects = main.o qmath.o utils.o
 
-t_objects = tests.o qmath.o
+t_objects = tests.o qmath.o utils.o
 
 qsim : $(objects)
 	gcc -o qsim $(objects)

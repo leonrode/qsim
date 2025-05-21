@@ -5,6 +5,9 @@
 #ifndef QMATH_H
 #define QMATH_H
 
+#define PI 3.14159265
+#define REAL_EQ_ERR 0.00000001;
+
 typedef double real_t;
 typedef enum {
     FALSE,
@@ -24,12 +27,18 @@ typedef struct {
     real_t theta;
 } polar_t; // re^(i*theta)
 
-
 bool_t cart_equal(cart_t a, cart_t b);
 cart_t cart_add(cart_t a, cart_t b);
 cart_t cart_mult(cart_t a, cart_t b);
 
 polar_t cart_to_polar(cart_t a);
 cart_t polar_to_cart(polar_t a);
+
+bool_t polar_equal(polar_t a, polar_t b);
+polar_t polar_add(polar_t a, polar_t b);
+polar_t polar_mult(polar_t a, polar_t b);
+
+bool_t equals(real_t a, real_t b);
+
 
 #endif
