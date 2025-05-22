@@ -1,6 +1,9 @@
 #include <assert.h>
+#include "math.h"
 #include "qmath.h"
 #include "utils.h"
+#include "gate.h"
+#include "state.h"
 
 static cart_t ZERO = {0, 0};
 static cart_t ONE = {1, 0};
@@ -15,6 +18,9 @@ static polar_t I_POLAR = {1, PI/2};
 
 static polar_t A_UNRED = {1, 3*PI + 0.5};
 static polar_t A_RED = {1, 3.6415926536};
+
+static gate_t X_GATE;
+static gate_t H_GATE;
 
 
 void cart_addition() {
@@ -48,11 +54,106 @@ void complex_conversions() {
     assert(polar_equal(ONE_POLAR, cart_to_polar(I)) == FALSE);
 }
 
+void state_equality() {
+    state_t zero_state, one_state, random_state;
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
+    init_state(&random_state, (polar_t[]) {{0.4747666066, 0}, {0.6, 0}});
+
+    assert(states_equal(&zero_state, &zero_state) == TRUE);
+    assert(states_equal(&one_state, &one_state) == TRUE);
+    assert(states_equal(&random_state, &random_state) == TRUE);
+
+    assert(states_equal(&zero_state, &one_state) == FALSE);
+    assert(states_equal(&random_state, &one_state) == FALSE);
+    assert(states_equal(&zero_state, &random_state) == FALSE);
+    
+}
+
+void x_gate() {
+
+
+    state_t zero_state, one_state;
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
+
+    apply_gate_to_state(&X_GATE, &zero_state);
+    assert(states_equal(&zero_state, &one_state) == TRUE);
+
+    // reset zero state
+
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+    apply_gate_to_state(&X_GATE, &one_state);
+
+    assert(states_equal(&zero_state, &one_state) == TRUE);
+
+    // reset one state
+    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
+}
+
+void h_gate() {
+    state_t zero_state, one_state, plus_state, minus_state;
+
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
+    init_state(&plus_state, (polar_t[]) {{1/sqrt(2), 0}, {1/sqrt(2), 0}});
+    init_state(&minus_state, (polar_t[]) {{1/sqrt(2), 0}, {1/sqrt(2), PI}});
+
+    // 0 --H-> +
+    apply_gate_to_state(&H_GATE, &zero_state);
+    assert(states_equal(&zero_state, &plus_state) == TRUE);
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+
+    // 1 --H-> -
+    apply_gate_to_state(&H_GATE, &one_state);
+    assert(states_equal(&one_state, &minus_state) == TRUE);
+    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
+
+    // 0--H--H-> 0
+
+    state_t zero_comp;
+    init_state(&zero_comp, (polar_t[]) {{1, 0}, {0, 0}});
+    apply_gate_to_state(&H_GATE, &zero_state);
+    apply_gate_to_state(&H_GATE, &zero_state);
+
+    assert(states_equal(&zero_comp, &zero_state) == TRUE);
+    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
+
+    // 1--H--H-->1
+    state_t one_comp; // comparison since modifying one_state directly
+    init_state(&one_comp, (polar_t[]) {{0, 0}, {1, 0}});
+    apply_gate_to_state(&H_GATE, &one_state);
+    print_state(&one_comp);
+    print_state(&one_state);
+    apply_gate_to_state(&H_GATE, &one_state);
+    print_state(&one_state);
+    print_state(&one_comp);
+    assert(states_equal(&one_comp, &one_state) == TRUE);
+    init_state(&one_state, (polar_t[]) {{1, 0}, {0, 0}});
+
+}
+
 int main() {
+
+    new_gate(&X_GATE, 2);
+    (X_GATE.elements[0][1]) = (polar_t) {1, 0};
+    (X_GATE.elements[1][0]) = (polar_t) {1, 0};
+
+    new_gate(&H_GATE, 2);
+    (H_GATE.elements[0][0]) = (polar_t) {1/sqrt(2), 0};
+    (H_GATE.elements[0][1]) = (polar_t) {1/sqrt(2), 0};
+    (H_GATE.elements[1][0]) = (polar_t) {1/sqrt(2), 0};
+    (H_GATE.elements[1][1]) = (polar_t) {-1/sqrt(2), 0};
+
     cart_addition();
     cart_multiplication();
     polar_equality();
 
     polar_reduction();
     complex_conversions();
+
+    state_equality();
+
+    x_gate();
+    h_gate();
 }

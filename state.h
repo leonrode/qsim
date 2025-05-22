@@ -8,4 +8,6 @@ typedef struct {
 
 void init_state(state_t* state, polar_t amplitudes[2]);
 void print_state(state_t* state);
+
+bool_t states_equal(state_t* a, state_t* b);
 #endif

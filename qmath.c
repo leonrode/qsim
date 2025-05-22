@@ -41,7 +41,7 @@ bool_t polar_equal(polar_t a, polar_t b) {
     real_t a_theta_effective = (a.theta < 2 * PI) ? a.theta : a.theta / (2 * PI);
     real_t b_theta_effective = (b.theta < 2 * PI) ? b.theta : b.theta / (2 * PI);
 
-    return a.r == b.r && equals(a_theta_effective, b_theta_effective);
+    return equals(a.r, b.r) && equals(a_theta_effective, b_theta_effective);
 }
 
 polar_t polar_add(polar_t a, polar_t b) {
