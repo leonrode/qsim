@@ -14,12 +14,13 @@ all fundamental code is self-written. no external libraries for linear algebra o
 
 ## todo
 
-- [ ] a lot of linear algebra
-- [ ] implement a qubit
-- [ ] implement a quantum gate
-    - [ ] application of quantum gate on qubit
-- [ ] multi-qubit state
-- [ ] building quantum circuits
+- [x] a lot of linear algebra
+- [x] implement a qubit
+- [x] implement a quantum gate
+    - [x] application of quantum gate on qubit
+- [x] multi-qubit state
+    - complete in the form of a quantum circuit
+- [x] building quantum circuits
     - [ ] visualizing quantum circuits in stdout
 
 ## future goals
