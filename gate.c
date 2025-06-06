@@ -27,12 +27,10 @@ void print_gate(gate_t* gate) {
 }
 
 void apply_gate_to_state(gate_t* gate, state_t* state) {
-
     polar_t** e = gate->elements;
     polar_t* a = state->amplitudes;
     polar_t a_prior = {a[0].r, a[0].theta};
-    // add(mult(e[0][0], a[0]), mult(e[0][1], a[1]))
+
     a[0] = polar_add(polar_mult(e[0][0], a[0]), polar_mult(e[0][1], a[1]));
-    // add(mult(e[1][0], a[0]), mult(e[1][1], a[1]))
     a[1] = polar_add(polar_mult(e[1][0], a_prior), polar_mult(e[1][1], a[1]));
 }
