@@ -1,4 +1,4 @@
-objects = main.o qmath.o utils.o gate.o state.o
+objects = main.o qmath.o utils.o gate.o state.o qc.o
 
 t_objects = tests.o qmath.o utils.o gate.o state.o
 
