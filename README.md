@@ -20,6 +20,7 @@ all fundamental code is self-written. no external libraries for linear algebra o
     - [x] application of quantum gate on qubit
 - [x] multi-qubit state
     - complete in the form of a quantum circuit
+- [ ] multi-qubit gate (cx, generic control gate)
 - [x] building quantum circuits
     - [ ] visualizing quantum circuits in stdout
 
