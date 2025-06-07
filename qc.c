@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "utils.h"
 #include "qc.h"
 
 void init_qc(qc_t* qc, int n_qubits) {
@@ -16,6 +17,22 @@ void add_operation(qc_t* qc, operation_t* operation) {
     qc->operations[qc->n_operations] = *operation;
     qc->n_operations++;
 }
+
+void x(qc_t* qc, int qubit_index) {
+    operation_t op;
+    op.qubit_index = qubit_index;
+    op.gate = &X_gate;
+    add_operation(qc, &op);
+}
+
+void h(qc_t* qc, int qubit_index) {
+    operation_t op;
+    op.qubit_index = qubit_index;
+    op.gate = &H_gate;
+    add_operation(qc, &op);
+}
+
+
 
 void run_qc(qc_t* qc) {
     for (int i = 0; i < qc->n_operations; i++) {
