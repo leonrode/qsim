@@ -3,7 +3,6 @@
 #include "qmath.h"
 #include "utils.h"
 #include "gate.h"
-#include "state.h"
 
 static cart_t ZERO = {0, 0};
 static cart_t ONE = {1, 0};
@@ -54,21 +53,6 @@ void complex_conversions() {
     assert(polar_equal(ONE_POLAR, cart_to_polar(I)) == FALSE);
 }
 
-void state_equality() {
-    state_t zero_state, one_state, random_state;
-    init_state(&zero_state, (polar_t[]) {{1, 0}, {0, 0}});
-    init_state(&one_state, (polar_t[]) {{0, 0}, {1, 0}});
-    init_state(&random_state, (polar_t[]) {{0.4747666066, 0}, {0.6, 0}});
-
-    assert(states_equal(&zero_state, &zero_state) == TRUE);
-    assert(states_equal(&one_state, &one_state) == TRUE);
-    assert(states_equal(&random_state, &random_state) == TRUE);
-
-    assert(states_equal(&zero_state, &one_state) == FALSE);
-    assert(states_equal(&random_state, &one_state) == FALSE);
-    assert(states_equal(&zero_state, &random_state) == FALSE);
-    
-}
 
 void x_gate() {
 
@@ -151,8 +135,6 @@ int main() {
 
     polar_reduction();
     complex_conversions();
-
-    state_equality();
 
     x_gate();
     h_gate();

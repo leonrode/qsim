@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "gate.h"
-#include "state.h"
 #include "qc.h"
 #include "utils.h"
 #include "math.h"
@@ -15,8 +14,7 @@ int main(int argc, char** argv) {
     h(&qc, 0);
     x(&qc, 1);
 
-    run_qc(&qc);
-    print_qc_states(&qc);
-
+    print_qc_amplitudes(&qc);
+    print_qc_operations(&qc);
     return 0;
 }

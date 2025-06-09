@@ -2,7 +2,6 @@
 #define QC_H
 
 #include "gate.h"
-#include "state.h"
 
 #define MAX_OPERATIONS 100 // max number of operations in a qc_t
 typedef struct {
@@ -20,23 +19,20 @@ typedef struct {
 
 typedef struct {
     operation_t* operations; // contains gate and applied qubit information in one dimensional array
-    state_t** states; // 2 ^ n_qubits states. for n = 1 we have |0> and |1>, n = 2 we have |00>, |01>, |10>, |11>
+    polar_t* amps; // 2^n_qubits polar_t representing the amplitudes of the states
     int n_operations;
     int n_qubits;
+    int n_amplitudes; // we don't want to have to calculate this every time
 } qc_t;
 
 void init_qc(qc_t* qc, int n_qubits);
 void add_operation(qc_t* qc, operation_t* operation);
 void x(qc_t* qc, int qubit_index);
 void h(qc_t* qc, int qubit_index);
-void cx(qc_t* qc, int qubit_index1, int qubit_index2);
-void cy(qc_t* qc, int qubit_index1, int qubit_index2);
-void cz(qc_t* qc, int qubit_index1, int qubit_index2);
-void swap(qc_t* qc, int qubit_index1, int qubit_index2);
-void cswap(qc_t* qc, int qubit_index1, int qubit_index2);
-void ccx(qc_t* qc, int qubit_index1, int qubit_index2, int qubit_index3);
+
 
 void run_qc(qc_t* qc);
-void print_qc_states(qc_t* qc);
+void print_qc_amplitudes(qc_t* qc);
+void print_qc_operations(qc_t* qc);
 
 #endif

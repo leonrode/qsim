@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "utils.h"
 #include "qc.h"
 
@@ -7,9 +8,12 @@ void init_qc(qc_t* qc, int n_qubits) {
     qc->n_qubits = n_qubits;
     qc->n_operations = 0;
     qc->operations = malloc(MAX_OPERATIONS * sizeof(operation_t));
-    qc->states = malloc(n_qubits * sizeof(state_t));
-    for (int i = 0; i < n_qubits; i++) {
-        init_state(&qc->states[i], (polar_t[]) { {1, 0}, {0, 0}}); // init states to zero (polar 1e^0 and 0e^0);
+    qc->n_amplitudes = pow(2, n_qubits);
+    qc->amps = malloc(qc->n_amplitudes * sizeof(polar_t));
+    // initialize |00...0> to 1 and all other amplitudes to 0
+    qc->amps[0] = (polar_t) {1, 0};
+    for (int i = 1; i < qc->n_amplitudes; i++) {
+        qc->amps[i] = (polar_t) {0, 0};
     }
 }
 
@@ -32,18 +36,15 @@ void h(qc_t* qc, int qubit_index) {
     add_operation(qc, &op);
 }
 
-
-
-void run_qc(qc_t* qc) {
+void print_qc_operations(qc_t* qc) {
     for (int i = 0; i < qc->n_operations; i++) {
         operation_t* operation = &qc->operations[i];
-        printf("Applying gate to qubit %d\n", operation->qubit_index);
-        apply_gate_to_state(operation->gate, &qc->states[operation->qubit_index]);
+        printf("Applying gate %s to qubit %d\n", operation->gate->name, operation->qubit_index);
     }
 }
 
-void print_qc_states(qc_t* qc) {
-    for (int i = 0; i < qc->n_qubits; i++) {
-        print_state(&qc->states[i]);
+void print_qc_amplitudes(qc_t* qc) {
+    for (int i = 0; i < qc->n_amplitudes; i++) {
+        printf("|%d> = %f exp(%f i)\n", i, qc->amps[i].r, qc->amps[i].theta);
     }
 }

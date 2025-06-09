@@ -1,6 +1,6 @@
-objects = main.o qmath.o utils.o gate.o state.o qc.o
+objects = main.o qmath.o utils.o gate.o qc.o
 
-t_objects = tests.o qmath.o utils.o gate.o state.o
+t_objects = tests.o qmath.o utils.o gate.o
 
 include_dir = "/include"
 
