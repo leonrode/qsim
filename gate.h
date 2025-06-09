@@ -7,7 +7,9 @@
 typedef struct {
     int ndim;
     polar_t** elements;
-} gate_t; // assume square gate for now 
+} gate_t;
+
+
 
 
 void new_gate(gate_t* gate, int n);

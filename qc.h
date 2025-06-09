@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
     operation_t* operations; // contains gate and applied qubit information in one dimensional array
-    state_t* states;
+    state_t** states; // 2 ^ n_qubits states. for n = 1 we have |0> and |1>, n = 2 we have |00>, |01>, |10>, |11>
     int n_operations;
     int n_qubits;
 } qc_t;

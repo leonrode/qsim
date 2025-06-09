@@ -48,6 +48,8 @@ polar_t reduce_polar(polar_t a);
 
 bool_t equals(real_t a, real_t b);
 
+void matrix_vector_mult(polar_t** a, polar_t** b, polar_t** c, int n);
+
 
 
 #endif

@@ -16,15 +16,19 @@ all fundamental code is self-written. no external libraries for linear algebra o
 
 - [x] a lot of linear algebra
 - [x] implement a qubit
-- [x] implement a quantum gate
-    - [x] application of quantum gate on qubit
-- [x] multi-qubit state
-    - complete in the form of a quantum circuit
-- [ ] multi-qubit gate (cx, generic control gate)
-- [x] building quantum circuits
+- [ ] multiqubit quantum circuits
+    - [ ] 2^n statevector
+- [ ] implement a quantum gate
+    - [ ] application of quantum gate on qubit
+    - [ ] application of a quantum gate on subset of circuits' qubits
+- [ ] multi-qubit state
+- [ ] building quantum circuits
     - [ ] visualizing quantum circuits in stdout
+- [ ] running quantum circuits
+    - [ ] final statevector
 
-## future goals
+## future goals (priority descending)
 
+* comparison of various simulation methods (sparsity based, tensor networks (MPS), decision diagrams)
 * implement a bloch sphere state visualizer in C
 * image visualization of quantum circuit
