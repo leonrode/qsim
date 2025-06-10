@@ -68,7 +68,6 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
     add_operation(qc, &op);
 }
 
-
 void print_qc_operations(qc_t* qc) {
     for (int i = 0; i < qc->n_operations; i++) {
         operation_t* operation = &qc->operations[i];
