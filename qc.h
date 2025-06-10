@@ -5,7 +5,7 @@
 
 #define MAX_OPERATIONS 100 // max number of operations in a qc_t
 typedef struct {
-    int qubit_index;
+    int* qubit_indices;
     gate_t* gate;
 } operation_t;
 
@@ -29,7 +29,7 @@ void init_qc(qc_t* qc, int n_qubits);
 void add_operation(qc_t* qc, operation_t* operation);
 void x(qc_t* qc, int qubit_index);
 void h(qc_t* qc, int qubit_index);
-
+void cx(qc_t* qc, int ctrl_index, int target_index);
 
 void run_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);

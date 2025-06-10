@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
 
     h(&qc, 0);
     x(&qc, 1);
+    cx(&qc, 0, 1);
 
     print_qc_amplitudes(&qc);
     print_qc_operations(&qc);

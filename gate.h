@@ -10,8 +10,9 @@ typedef struct {
 } gate_t;
 
 
-void new_gate(gate_t* gate, int n);
+void new_gate(gate_t* gate, int n, char* name);
 void print_gate(gate_t* gate);
+void fill_with_zeros(gate_t* gate);
 
 
 #endif
