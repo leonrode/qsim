@@ -1,8 +1,6 @@
 #include <stdio.h>
-#include "gate.h"
 #include "qc.h"
 #include "utils.h"
-#include "math.h"
 
 int main(int argc, char** argv) {
     init_gates();
