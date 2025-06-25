@@ -50,6 +50,8 @@ bool_t equals(real_t a, real_t b);
 
 void matrix_vector_mult(polar_t** a, polar_t** b, polar_t** c, int n);
 
+// a is m * n, b is p * q, c is (m * p) * (n * q) matrix
+void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int p, int q);
 
 
 #endif

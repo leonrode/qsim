@@ -32,3 +32,7 @@ all fundamental code is self-written. no external libraries for linear algebra o
 * comparison of various simulation methods (sparsity based, tensor networks (MPS), decision diagrams)
 * implement a bloch sphere state visualizer in C
 * image visualization of quantum circuit
+
+## references
+
+- https://en.wikipedia.org/wiki/Kronecker_product

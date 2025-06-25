@@ -64,7 +64,6 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
     }
 
     op.gate = CX_gate;
-    print_gate(op.gate);
     add_operation(qc, &op);
 }
 
@@ -82,8 +81,6 @@ void print_qc_operations(qc_t* qc) {
         printf("\n");
     }
 }
-
-
 
 void print_qc_amplitudes(qc_t* qc) {
     for (int i = 0; i < qc->n_amplitudes; i++) {

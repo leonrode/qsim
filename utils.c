@@ -5,6 +5,7 @@
 gate_t I_gate;
 gate_t X_gate;
 gate_t H_gate;
+gate_t Z_gate;
 
 void print_polar(polar_t p) {
     printf("(%f)exp(i[%f])\n", p.r, p.theta);
@@ -32,6 +33,13 @@ void init_gates() {
     (H_gate.elements[1][0]) = (polar_t) {1/sqrt(2), 0};
     (H_gate.elements[1][1]) = (polar_t) {-1/sqrt(2), 0};
     H_gate.name = "H";
+
+    new_gate(&Z_gate, 2, "Z");
+    (Z_gate.elements[0][0]) = (polar_t) {1, 0};
+    (Z_gate.elements[0][1]) = (polar_t) {0, 0};
+    (Z_gate.elements[1][0]) = (polar_t) {0, 0};
+    (Z_gate.elements[1][1]) = (polar_t) {-1, 0};
+    Z_gate.name = "Z";
 
 }
 
