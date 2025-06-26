@@ -111,3 +111,11 @@ void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int 
         }
     }
 }
+
+void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            c[i][j] = polar_add(a[i][j], b[i][j]);
+        }
+    }
+}

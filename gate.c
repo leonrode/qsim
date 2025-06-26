@@ -34,3 +34,11 @@ void fill_with_zeros(gate_t* gate) {
         }
     }
 }
+
+void build_controlled_U(gate_t* u, int m, int num_total_qubits, int control_qubit, int* target_qubits, gate_t* output) {
+    // we need to build a controlled-U gate
+    // the output gate will be a 2^num_total_qubits x 2^num_total_qubits matrix
+    // the control qubit is the first qubit
+    // the target qubits are the remaining qubits
+    // the control qubit is the first qubit
+}
