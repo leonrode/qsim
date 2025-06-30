@@ -36,3 +36,4 @@ all fundamental code is self-written. no external libraries for linear algebra o
 ## references
 
 - https://en.wikipedia.org/wiki/Kronecker_product
+- https://quantumcomputing.stackexchange.com/questions/9614/how-to-interpret-a-4-qubit-quantum-circuit-as-a-matrix (matrix representation of controlled-U gate)
