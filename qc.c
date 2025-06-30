@@ -119,7 +119,8 @@ void run_qc(qc_t* qc) {
         printf("operation: %s with dimension %d\n", operation->gate->name, operation->gate->ndim);
         // e.g. if operation is X[1] then we take
         // I* X * I ... until we have 2^n sized matrix 
-        // we need the first qubit index to know how many I's to multiply 
+        // we need the first qubit index to know how many I's to multiply
+        print_matrix(operation->gate->elements, operation->gate->ndim, operation->gate->ndim);
         int first_qubit_index = operation->qubit_indices[0];
         printf("first_qubit_index: %d\n", first_qubit_index);
         int product_index = 0;
@@ -156,6 +157,7 @@ void run_qc(qc_t* qc) {
 
         printf("product_index: %d\n", product_index);
 
+        print_matrix(products[product_index - 1], 1 << (product_index), 1 << (product_index));
         // now for the remaining qubits we kronecker the product at products[product_index - 1] with the identity
 
         for (int j = product_index; j < qc->n_qubits; j++) {
