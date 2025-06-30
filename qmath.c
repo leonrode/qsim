@@ -78,11 +78,11 @@ bool_t equals(real_t a, real_t b) {
     return fabs(a - b) < REAL_EQ_ERR;
 }
 // stores result in c
-void matrix_vector_mult(polar_t** a, polar_t** b, polar_t** c, int n) {
+void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n) {
     for (int i = 0; i < n; i++) {
-        *c[i] = (polar_t) {0, 0};
+        c[i] = (polar_t) {0, 0};
         for (int j = 0; j < n; j++) {
-            *c[i] = polar_add(*c[i], polar_mult(a[i][j], *b[j]));
+            c[i] = polar_add(c[i], polar_mult(a[i][j], b[j]));
         }
     }
 }

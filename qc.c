@@ -163,11 +163,44 @@ void run_qc(qc_t* qc) {
         product_index = (int) log2((1 << (product_index)) * operation->gate->ndim - 1) + 1;
         printf("product_index post kronecker product: %d\n", product_index);
 
-        
+        // now for the remaining qubits we kronecker the product at products[product_index - 1] with the identity
+
+        for (int j = product_index; j < qc->n_qubits; j++) {
+            kronecker_product(products[j - 1], I_gate.elements, products[j], 1 << (j), 1 << (j), 2, 2);
+        }
+
+        printf("--------------------------------\n");
+        print_matrix(products[qc->n_qubits - 1], 1 << (qc->n_qubits), 1 << (qc->n_qubits));
 
 
+        // now we print the amplitudes
+        for (int i = 0; i < qc->n_amplitudes; i++) {
+            printf("|%d> = %f exp(%f i)\n", i, qc->amps[i].r, qc->amps[i].theta);
+        }
 
+        // build output amps
+        polar_t* output_amps = malloc(qc->n_amplitudes * sizeof(polar_t));
+        for (int i = 0; i < qc->n_amplitudes; i++) {
+            output_amps[i] = (polar_t) {0, 0};
+        }
 
+        // now we matrix multiply the product with the amplitudes
+        matrix_vector_mult(products[qc->n_qubits - 1], qc->amps, output_amps, qc->n_amplitudes);
+
+        printf("--------------------------------\n");
+
+        // now we print the amplitudes
+        for (int i = 0; i < qc->n_amplitudes; i++) {
+            printf("|%d> = %f exp(%f i)\n", i, output_amps[i].r, output_amps[i].theta);
+        }
+
+        // copy output amps back to qc->amps
+        for (int i = 0; i < qc->n_amplitudes; i++) {
+            qc->amps[i] = output_amps[i];
+        }
+
+        free(output_amps);
+        free(products);
     }
 
 
