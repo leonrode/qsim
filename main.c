@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     operation_t H_op;
     H_op.gate = &H_gate;
     H_op.qubit_indices = malloc(sizeof(int) * 1);
-    H_op.qubit_indices[0] = 1;
+    H_op.qubit_indices[0] = 2;
     H_op.n_qubit_indices = 1;
     add_operation(qc, &H_op);
 
