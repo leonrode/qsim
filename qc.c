@@ -92,24 +92,65 @@ void run_qc(qc_t* qc) {
 
     // init product representations of size
     // 4, 8, 16, ... until 2^n qubits
-    polar_t*** products = malloc(qc->n_qubits * sizeof(polar_t**));
-    for (int i = 2; i <= qc->n_qubits; i++) {
-        products[i] = malloc((1 << i) * sizeof(polar_t*));
-        // init the product matrices
-        for (int j = 0; j < (1 << i); j++) {
-            products[i][j] = malloc((1 << i) * sizeof(polar_t));
-            for (int k = 0; k < (1 << i); k++) {
-                products[i][j][k] = (polar_t) {0, 0};
-            }
-        }
-    }
 
     // now we iterate through the operations
     for (int i = 0; i < qc->n_operations; i++) {
+
+        /*
+         * products[0] is 2x2
+         * products[1] is 4x4
+         * products[2] is 8x8
+         * ...
+         * products[n-1] is 2^n x 2^n
+         */
+        polar_t*** products = malloc((qc->n_qubits - 1) * sizeof(polar_t**));
+        for (int i = 1; i <= qc->n_qubits; i++) {
+            products[i - 1] = malloc((1 << i) * sizeof(polar_t*));
+            // init the product matrices
+            for (int j = 0; j < (1 << i); j++) {
+                products[i - 1][j] = malloc((1 << i) * sizeof(polar_t));
+                for (int k = 0; k < (1 << i); k++) {
+                    products[i - 1][j][k] = (polar_t) {0, 0};
+                }
+            }
+        }
+        printf("built products\n");
         operation_t* operation = &qc->operations[i];
+        printf("operation: %s with dimension %d\n", operation->gate->name, operation->gate->ndim);
         // e.g. if operation is X[1] then we take
-        // I * X * I ... until we have 2^n sized matrix
+        // I* X * I ... until we have 2^n sized matrix 
+        // we need the first qubit index to know how many I's to multiply 
+        int first_qubit_index = operation->qubit_indices[0];
+        int product_index = 0;
+
+        if (first_qubit_index == 0) {
+            // copy the gate into the proper product 
+            // whose index is given by log(gate dimension)
+
+            printf("%d %d\n", operation->gate->ndim, (int) log2(operation->gate->ndim));
+
+            copy_matrix(operation->gate->elements, products[(int) log2(operation->gate->ndim)], operation->gate->ndim, operation->gate->ndim);
+            product_index += (int) log2(operation->gate->ndim) + 1;
+        } else if (first_qubit_index == 1) {
+            // copy the identity into the first product 
+            copy_matrix(I_gate.elements, products[0], 2, 2);
+            product_index++;
+
+            // now we kronecker the gate with the identity
+            kronecker_product(products[0], operation->gate->elements, products[product_index], 2, 2, operation->gate->ndim, operation->gate->ndim);
+            product_index += (int) log2(operation->gate->ndim * 2);
+        } else {
+            
+        }
+
         
+        
+
+        
+
+
+
+
     }
 
 

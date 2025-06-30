@@ -36,6 +36,8 @@ int main(int argc, char** argv) {
 
     print_qc_operations(qc);
 
+    run_qc(qc);
+
 
     return 0;
 }

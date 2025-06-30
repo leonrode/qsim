@@ -43,4 +43,10 @@ void init_gates() {
 
 }
 
-
+void copy_matrix(polar_t** src, polar_t** dst, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            dst[i][j] = src[i][j];
+        }
+    }
+}
