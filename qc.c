@@ -103,7 +103,7 @@ void run_qc(qc_t* qc) {
          * ...
          * products[n-1] is 2^n x 2^n
          */
-        polar_t*** products = malloc((qc->n_qubits - 1) * sizeof(polar_t**));
+        polar_t*** products = malloc((qc->n_qubits) * sizeof(polar_t**));
         for (int i = 1; i <= qc->n_qubits; i++) {
             products[i - 1] = malloc((1 << i) * sizeof(polar_t*));
             // init the product matrices
@@ -121,30 +121,47 @@ void run_qc(qc_t* qc) {
         // I* X * I ... until we have 2^n sized matrix 
         // we need the first qubit index to know how many I's to multiply 
         int first_qubit_index = operation->qubit_indices[0];
+        printf("first_qubit_index: %d\n", first_qubit_index);
         int product_index = 0;
 
-        if (first_qubit_index == 0) {
-            // copy the gate into the proper product 
-            // whose index is given by log(gate dimension)
-
-            printf("%d %d\n", operation->gate->ndim, (int) log2(operation->gate->ndim));
-
-            copy_matrix(operation->gate->elements, products[(int) log2(operation->gate->ndim)], operation->gate->ndim, operation->gate->ndim);
-            product_index += (int) log2(operation->gate->ndim) + 1;
-        } else if (first_qubit_index == 1) {
-            // copy the identity into the first product 
+        if (first_qubit_index != 0) {
+            // copy I in to product[0]
             copy_matrix(I_gate.elements, products[0], 2, 2);
-            product_index++;
 
-            // now we kronecker the gate with the identity
-            kronecker_product(products[0], operation->gate->elements, products[product_index], 2, 2, operation->gate->ndim, operation->gate->ndim);
-            product_index += (int) log2(operation->gate->ndim * 2);
-        } else {
-            
+            for (int j = 1; j < first_qubit_index; j++) {
+                printf("%d\n", 1 << j);
+                kronecker_product(products[j - 1], I_gate.elements, products[j], 1 << (j), 1 << (j), 2, 2);
+            }
+
+            product_index = first_qubit_index;
         }
 
+        printf("product_index: %d\n", product_index);
+
+        print_matrix(products[0], 2, 2);
+        printf("--------------------------------\n");
+        print_matrix(products[1], 4, 4);
+        printf("--------------------------------\n");
+        print_matrix(products[2], 8, 8);
         
+        // product stored in products[product_index - 1]
+        // it has size 2^(product_index) * 2^(product_index)
+        // the gate has size operation->gate->ndim * operation->gate->ndim
         
+        // thus the final size is 2^product_index * operation->gate->ndim
+        // thus the final product is stored in products[2^product_index * operation->gate->ndim - 1]
+
+        printf("kronecker product betweeen products[%d] and operation->gate->elements of size %d x %d\n", product_index - 1, operation->gate->ndim, operation->gate->ndim);
+        printf("products[%d] size: %d x %d\n", product_index - 1, 1 << (product_index), 1 << (product_index));
+        printf("stored in products[%d]\n", (int) log2((1 << (product_index)) * operation->gate->ndim - 1));
+
+        printf("Call is a: products[%d], c: products[%d], m: %d, n: %d, p: %d, q: %d\n", product_index - 1, (int) log2((1 << (product_index)) * operation->gate->ndim - 1), 1 << (product_index), 1 << (product_index), operation->gate->ndim, operation->gate->ndim);
+        kronecker_product(products[product_index - 1], operation->gate->elements, products[(int) log2((1 << (product_index)) * operation->gate->ndim - 1)], 1 << (product_index), 1 << (product_index), operation->gate->ndim, operation->gate->ndim);
+        
+        printf("--------------------------------\n");
+        print_matrix(products[2], 8, 8);
+        product_index = (int) log2((1 << (product_index)) * operation->gate->ndim - 1) + 1;
+        printf("product_index post kronecker product: %d\n", product_index);
 
         
 

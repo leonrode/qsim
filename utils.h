@@ -18,4 +18,6 @@ void init_gates();
 // src and dest are m x n matrices
 void copy_matrix(polar_t** src, polar_t** dst, int m, int n);
 
+void print_matrix(polar_t** matrix, int m, int n);
+
 #endif

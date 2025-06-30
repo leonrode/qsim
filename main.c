@@ -17,22 +17,22 @@ int main(int argc, char** argv) {
     build_controlled_single_qubit_gate(&X_gate, 2, 2, 1, 0, CX);
 
     qc_t* qc = malloc(sizeof(qc_t));
-    init_qc(qc, 2);
+    init_qc(qc, 3);
 
     operation_t H_op;
     H_op.gate = &H_gate;
     H_op.qubit_indices = malloc(sizeof(int) * 1);
-    H_op.qubit_indices[0] = 0;
+    H_op.qubit_indices[0] = 2;
     H_op.n_qubit_indices = 1;
     add_operation(qc, &H_op);
 
-    operation_t CX_op;
-    CX_op.gate = CX;
-    CX_op.qubit_indices = malloc(sizeof(int) * 2);
-    CX_op.qubit_indices[0] = 0;
-    CX_op.qubit_indices[1] = 1;
-    CX_op.n_qubit_indices = 2;
-    add_operation(qc, &CX_op);
+    // operation_t CX_op;
+    // CX_op.gate = CX;
+    // CX_op.qubit_indices = malloc(sizeof(int) * 2);
+    // CX_op.qubit_indices[0] = 0;
+    // CX_op.qubit_indices[1] = 1;
+    // CX_op.n_qubit_indices = 2;
+    // add_operation(qc, &CX_op);
 
     print_qc_operations(qc);
 
