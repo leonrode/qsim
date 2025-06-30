@@ -7,10 +7,13 @@
  */
 void new_gate(gate_t* gate, int n, char* name) {
     gate->ndim = n;
-    gate->elements = malloc(n * sizeof(complex_t*));
+    gate->elements = malloc(n * sizeof(polar_t*));
     gate->name = name;
     for (int i = 0; i < n; i++) {
-        gate->elements[i] = malloc(n * sizeof(complex_t));
+        gate->elements[i] = malloc(n * sizeof(polar_t));
+        for (int j = 0; j < n; j++) { // init the gate to zero
+            (gate->elements[i][j]) = (polar_t) {0, 0};
+        }
     }
 }
 
@@ -35,10 +38,49 @@ void fill_with_zeros(gate_t* gate) {
     }
 }
 
-void build_controlled_U(gate_t* u, int m, int num_total_qubits, int control_qubit, int* target_qubits, gate_t* output) {
-    // we need to build a controlled-U gate
-    // the output gate will be a 2^num_total_qubits x 2^num_total_qubits matrix
-    // the control qubit is the first qubit
-    // the target qubits are the remaining qubits
-    // the control qubit is the first qubit
+void build_controlled_single_qubit_gate(gate_t* u, int m, int num_total_qubits, int control_qubit, int target_qubit, gate_t* output) {
+
+    // number of qubits between the control and target
+    // e.g. for CX[0, 1] we have n = 0
+    int n = target_qubit - control_qubit - 1;
+    // compute N = 2^(n+2)
+    int N = 1 << (n + 2); 
+    
+    // insert (N / 2) order identity in top left corner
+    // we assume the output gate is already initialized with zeros
+    for (int i = 0; i < N / 2; i++) {
+        output->elements[i][i] = (polar_t) {1, 0};
+    }
+
+    // we compute kronecker product of I_(N/4) and U
+    
+    // this will be of size N/2 x N/2
+
+    polar_t** IN_4 = malloc(N/4 * sizeof(polar_t*));
+    for (int i = 0; i < N/4; i++) {
+        IN_4[i] = malloc(N/4 * sizeof(polar_t));
+        for (int j = 0; j < N/4; j++) {
+            if (i == j) IN_4[i][j] = (polar_t) {1, 0}; // 1's along diagonal
+            else IN_4[i][j] = (polar_t) {0, 0};
+        }
+    }
+
+    // we init product of size N/2
+    polar_t** product = malloc(N/2 * sizeof(polar_t*));
+    for (int i = 0; i < N/2; i++) {
+        product[i] = malloc(N/2 * sizeof(polar_t));
+        for (int j = 0; j < N/2; j++) {
+            product[i][j] = (polar_t) {0, 0};
+        }
+    }
+
+    kronecker_product(IN_4, u->elements, product, N/4, N/4, u->ndim, u->ndim);
+
+    // copy product into bottom right corner
+    for (int i = 0; i < N/2; i++) {
+        for (int j = 0; j < N/2; j++) {
+            output->elements[i + N/2][j + N/2] = product[i][j];
+        }
+    }
+
 }

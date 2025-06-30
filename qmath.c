@@ -56,7 +56,6 @@ polar_t polar_add(polar_t a, polar_t b) {
 polar_t polar_mult(polar_t a, polar_t b) {
     polar_t prod = { a.r * b.r, a.theta + b.theta };
 
-
     return reduce_polar(prod);
 }
 
@@ -100,11 +99,9 @@ void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int 
     for (int block_x = 0; block_x < n * q; block_x += q) {
         for (int block_y = 0; block_y < m * p; block_y += p) {
 
-            printf("block_x %d block_y %d\n", block_x, block_y);
             // now we iterate through the p rows and q columns of B
             for (int row = 0; row < p; row++) {
                 for (int col = 0; col < q; col++) {
-                    printf("col %d row %d\n", row, col);
                     c[block_y + row][block_x + col] = polar_mult(a[block_y / p][block_x / q], b[row][col]);
                 }
             }
