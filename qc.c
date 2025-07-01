@@ -43,7 +43,7 @@ void h(qc_t* qc, int qubit_index) {
 
 void cx(qc_t* qc, int ctrl_index, int target_index) {
 
-
+    new_gate(&CX_gate, 1 << (target_index - ctrl_index + 1), "CX");
     build_controlled_single_qubit_gate(&X_gate, 2, 2, ctrl_index, target_index, &CX_gate);
 
     operation_t CX_op;
@@ -53,6 +53,27 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
     CX_op.qubit_indices[1] = target_index;
     CX_op.n_qubit_indices = 2;
     add_operation(qc, &CX_op);
+}
+
+void swap(qc_t* qc, int qubit_1, int qubit_2) {
+
+    new_gate(&SWAP_gate, 1 << (qubit_2 - qubit_1 + 1), "SWAP");
+    
+    for (int i = 0; i < SWAP_gate.ndim; i++) {
+        for (int j = 0; j < SWAP_gate.ndim; j++) {
+            SWAP_gate.elements[i][j] = (polar_t) {0, 0};
+        }
+    }
+
+    build_swap_gate(&SWAP_gate, qubit_1, qubit_2);
+
+    operation_t op;
+    op.gate = &SWAP_gate;
+    op.qubit_indices = malloc(sizeof(int) * 2);
+    op.qubit_indices[0] = qubit_1;
+    op.qubit_indices[1] = qubit_2;
+    op.n_qubit_indices = 2;
+    add_operation(qc, &op);
 }
 
 void print_qc_operations(qc_t* qc) {
@@ -103,6 +124,8 @@ void run_qc(qc_t* qc) {
             }
         }
         operation_t* operation = &qc->operations[i];
+
+
         // e.g. if operation is X[1] then we take
         // I* X * I ... until we have 2^n sized matrix 
         // we need the first qubit index to know how many I's to multiply
@@ -140,6 +163,7 @@ void run_qc(qc_t* qc) {
             kronecker_product(products[j - 1], I_gate.elements, products[j], 1 << (j), 1 << (j), 2, 2);
         }
 
+
         // build output amps
         polar_t* output_amps = malloc(qc->n_amplitudes * sizeof(polar_t));
         for (int i = 0; i < qc->n_amplitudes; i++) {
@@ -155,6 +179,12 @@ void run_qc(qc_t* qc) {
         }
 
         free(output_amps);
+        for (int i = 0; i < qc->n_qubits; i++) {
+            for (int j = 0; j < (1 << i); j++) {
+                free(products[i][j]);
+            }
+            free(products[i]);
+        }
         free(products);
     }
 

@@ -12,6 +12,8 @@ extern gate_t X_gate;
 extern gate_t H_gate;
 extern gate_t Z_gate;
 extern gate_t CX_gate;
+extern gate_t SWAP_gate;
+
 void init_gates();
 
 

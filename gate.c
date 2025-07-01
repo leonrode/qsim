@@ -84,3 +84,36 @@ void build_controlled_single_qubit_gate(gate_t* u, int m, int num_total_qubits, 
     }
 
 }
+
+void build_swap_gate(gate_t* output, int qubit_1, int qubit_2) {
+
+    // the size of this gate is 2^(qubit_2 - qubit_1 + 1)
+    if (qubit_1 > qubit_2) { // account for the case where qubit_1 > qubit_2
+        int t = qubit_1;
+        qubit_1 = qubit_2;
+        qubit_2 = t;
+    }
+
+    int n = qubit_2 - qubit_1 + 1;
+    int N = 1 << n;
+
+
+    for (int i = 0; i < N; i++) {
+        // we want to find the number after swapping the qubit_1'th and qubit_2'th bits in i
+        // note that we are in little endian
+        // qubit1'th bit
+        int qubit1_bit = (i >> qubit_1) & 1;
+        int qubit2_bit = (i >> qubit_2) & 1;
+
+
+        int swap = i;
+        if (qubit1_bit != qubit2_bit) {
+            swap ^= (1 << qubit1_bit) | (1 << qubit2_bit);
+        }
+
+        for (int j = 0; j < N; j++) {
+            if (j != swap) output->elements[i][j] = (polar_t) {0, 0};
+            else output->elements[i][j] = (polar_t) {1, 0};
+        }
+    }
+}

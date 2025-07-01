@@ -7,6 +7,7 @@ gate_t X_gate;
 gate_t H_gate;
 gate_t Z_gate;
 gate_t CX_gate;
+gate_t SWAP_gate;
 
 void print_polar(polar_t p) {
     printf("(%f)exp(i[%f])\n", p.r, p.theta);
@@ -38,7 +39,6 @@ void init_gates() {
     (Z_gate.elements[1][0]) = (polar_t) {0, 0};
     (Z_gate.elements[1][1]) = (polar_t) {-1, 0};
 
-    new_gate(&CX_gate, 4, "CX");
 }
 
 void copy_matrix(polar_t** src, polar_t** dst, int m, int n) {
