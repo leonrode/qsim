@@ -1,17 +1,52 @@
-objects = main.o qmath.o utils.o gate.o qc.o
+# Directories
+SRC_DIR = src/
+INCLUDE_DIR = include/
+BUILD_DIR = build/
 
-t_objects = tests.o qmath.o utils.o gate.o
+# Source files (assuming they're in src/)
+SOURCES = $(wildcard $(SRC_DIR)*.c)
+OBJECTS = $(SOURCES:$(SRC_DIR)%.c=$(BUILD_DIR)%.o)
 
-include_dir = "/include"
+# Test files
+TEST_SOURCES = $(wildcard tests.c)
+TEST_OBJECTS = $(TEST_SOURCES:%.c=$(BUILD_DIR)%.o)
+TEST_DEPS = $(filter-out $(BUILD_DIR)main.o, $(OBJECTS))
 
-qsim : $(objects)
-	gcc -o qsim $(objects) -I ${include_dir}
+# Compiler and flags
+CC = gcc
+CFLAGS = -Wall -Wextra -I$(INCLUDE_DIR)
+TARGET = qsim
+TEST_TARGET = tests
 
-tests : $(t_objects) 
-	gcc -o tests $(t_objects) -I ${include_dir}
+# Default target
+all: $(TARGET)
 
+# Create build directory if it doesn't exist
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Main executable
+$(TARGET): $(BUILD_DIR) $(OBJECTS)
+	$(CC) $(OBJECTS) -o $(TARGET)
+
+# Test executable
+$(TEST_TARGET): $(BUILD_DIR) $(TEST_OBJECTS) $(TEST_DEPS)
+	$(CC) $(TEST_OBJECTS) $(TEST_DEPS) -o $(TEST_TARGET)
+
+# Compile source files
+$(BUILD_DIR)%.o: $(SRC_DIR)%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile test files (if they're in root directory)
+$(BUILD_DIR)%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean targets
 clean:
-	rm qsim $(objects)
+	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_TARGET)
 
 clean_tests:
-	rm tests $(t_objects)
+	rm -f $(TEST_TARGET) $(TEST_OBJECTS)
+
+# Phony targets
+.PHONY: all clean clean_tests

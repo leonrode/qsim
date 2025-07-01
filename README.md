@@ -16,12 +16,13 @@ all fundamental code is self-written. no external libraries for linear algebra o
 
 - [x] a lot of linear algebra
 - [x] implement a qubit
-- [ ] multiqubit quantum circuits
+- [x] multiqubit quantum circuits
     - [ ] 2^n statevector
-- [ ] implement a quantum gate
-    - [ ] application of quantum gate on qubit
-    - [ ] application of a quantum gate on subset of circuits' qubits
-- [ ] multi-qubit state
+- [x] implement a quantum gate
+    - [x] application of quantum gate on qubit
+    - [x] application of a quantum gate on subset of circuits' qubits
+        - achieved by building 2^n x 2^n matrix on a layer-by-layer basis
+- [x] multi-qubit state
 - [ ] building quantum circuits
     - [ ] visualizing quantum circuits in stdout
 - [ ] running quantum circuits
