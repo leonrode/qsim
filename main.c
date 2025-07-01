@@ -12,11 +12,9 @@ int main(int argc, char** argv) {
     qc_t* qc = malloc(sizeof(qc_t));
     init_qc(qc, 2);
 
-    // h(qc, 0);
-    // printf("SWAP");
-    x(qc, 0);
-    swap(qc, 0, 1);
-    // swap(qc, 1, 2);
+    
+    x(qc, 1);
+    cx(qc, 1, 0);
 
 
     // cx(qc, 0, 1);

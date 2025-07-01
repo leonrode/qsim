@@ -43,6 +43,17 @@ void h(qc_t* qc, int qubit_index) {
 
 void cx(qc_t* qc, int ctrl_index, int target_index) {
 
+    int swapped = 0;
+    if (ctrl_index > target_index) {
+        // we add swap gate
+        swap(qc, target_index, ctrl_index);
+        swapped = 1;
+        int t = ctrl_index;
+        ctrl_index = target_index;
+        target_index = t;
+    }
+
+
     new_gate(&CX_gate, 1 << (target_index - ctrl_index + 1), "CX");
     build_controlled_single_qubit_gate(&X_gate, 2, 2, ctrl_index, target_index, &CX_gate);
 
@@ -53,8 +64,13 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
     CX_op.qubit_indices[1] = target_index;
     CX_op.n_qubit_indices = 2;
     add_operation(qc, &CX_op);
+
+    if (swapped) {
+        swap(qc, ctrl_index, target_index);
+    }
 }
 
+// requires qubit_2 > qubit_1
 void swap(qc_t* qc, int qubit_1, int qubit_2) {
 
     new_gate(&SWAP_gate, 1 << (qubit_2 - qubit_1 + 1), "SWAP");
