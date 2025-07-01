@@ -23,49 +23,37 @@ void add_operation(qc_t* qc, operation_t* operation) {
     qc->n_operations++;
 }
 
-// void x(qc_t* qc, int qubit_index) {
-//     operation_t op;
-//     op.qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
-//     op.qubit_indices[qubit_index] = 1;
-//     op.gate = &X_gate;
-//     add_operation(qc, &op);
-// }
+void x(qc_t* qc, int qubit_index) {
+    operation_t op;
+    op.qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
+    op.qubit_indices[0] = qubit_index;
+    op.n_qubit_indices = 1;
+    op.gate = &X_gate;
+    add_operation(qc, &op);
+}
 
-// void h(qc_t* qc, int qubit_index) {
-//     operation_t op;
-//     op.qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
-//     op.qubit_indices[qubit_index] = 1;
-//     op.gate = &H_gate;
-//     add_operation(qc, &op);
-// }
+void h(qc_t* qc, int qubit_index) {
+    operation_t op;
+    op.qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
+    op.qubit_indices[0] = qubit_index;
+    op.n_qubit_indices = 1;
+    op.gate = &H_gate;
+    add_operation(qc, &op);
+}
 
-// void cx(qc_t* qc, int ctrl_index, int target_index) {
-//     operation_t op;
-//     op.qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int)); // calloc to init 0
-//     op.qubit_indices[ctrl_index] = -1;
-//     op.qubit_indices[target_index] = 1;
+void cx(qc_t* qc, int ctrl_index, int target_index) {
 
-//     // we have to build this one out on the fly
-//     gate_t* CX_gate = malloc(sizeof(gate_t));
-//     new_gate(CX_gate, qc->n_amplitudes, "CX");
 
-//     // init with zeros.
-//     fill_with_zeros(CX_gate);
+    build_controlled_single_qubit_gate(&X_gate, 2, 2, ctrl_index, target_index, &CX_gate);
 
-//     for (int i = 0; i < qc->n_amplitudes; i++) { // row major order
-//         // we have to check if the ctrl_index'th bit in i is set
-//         if (i >> ctrl_index & 1) {
-//             // then we flip the target_index'th bit in i
-//             int flipped_i = i ^ (1 << target_index);
-//             (CX_gate->elements[i][flipped_i]) = (polar_t) {1, 0};
-//         } else {
-//             (CX_gate->elements[i][i]) = (polar_t) {1, 0};
-//         }
-//     }
-
-//     op.gate = CX_gate;
-//     add_operation(qc, &op);
-// }
+    operation_t CX_op;
+    CX_op.gate = &CX_gate;
+    CX_op.qubit_indices = malloc(sizeof(int) * 2);
+    CX_op.qubit_indices[0] = ctrl_index;
+    CX_op.qubit_indices[1] = target_index;
+    CX_op.n_qubit_indices = 2;
+    add_operation(qc, &CX_op);
+}
 
 void print_qc_operations(qc_t* qc) {
     for (int i = 0; i < qc->n_operations; i++) {
@@ -114,15 +102,12 @@ void run_qc(qc_t* qc) {
                 }
             }
         }
-        printf("built products\n");
         operation_t* operation = &qc->operations[i];
-        printf("operation: %s with dimension %d\n", operation->gate->name, operation->gate->ndim);
         // e.g. if operation is X[1] then we take
         // I* X * I ... until we have 2^n sized matrix 
         // we need the first qubit index to know how many I's to multiply
-        print_matrix(operation->gate->elements, operation->gate->ndim, operation->gate->ndim);
         int first_qubit_index = operation->qubit_indices[0];
-        printf("first_qubit_index: %d\n", first_qubit_index);
+
         int product_index = 0;
 
         if (first_qubit_index != 0) {
@@ -130,7 +115,6 @@ void run_qc(qc_t* qc) {
             copy_matrix(I_gate.elements, products[0], 2, 2);
 
             for (int j = 1; j < first_qubit_index; j++) {
-                printf("%d\n", 1 << j);
                 kronecker_product(products[j - 1], I_gate.elements, products[j], 1 << (j), 1 << (j), 2, 2);
             }
 
@@ -142,35 +126,18 @@ void run_qc(qc_t* qc) {
             // thus the final size is 2^product_index * operation->gate->ndim
             // thus the final product is stored in products[2^product_index * operation->gate->ndim - 1]
 
-            printf("kronecker product betweeen products[%d] and operation->gate->elements of size %d x %d\n", product_index - 1, operation->gate->ndim, operation->gate->ndim);
-            printf("products[%d] size: %d x %d\n", product_index - 1, 1 << (product_index), 1 << (product_index));
-            printf("stored in products[%d]\n", (int) log2((1 << (product_index)) * operation->gate->ndim - 1));
-
-            printf("Call is a: products[%d], c: products[%d], m: %d, n: %d, p: %d, q: %d\n", product_index - 1, (int) log2((1 << (product_index)) * operation->gate->ndim - 1), 1 << (product_index), 1 << (product_index), operation->gate->ndim, operation->gate->ndim);
             kronecker_product(products[product_index - 1], operation->gate->elements, products[(int) log2((1 << (product_index)) * operation->gate->ndim - 1)], 1 << (product_index), 1 << (product_index), operation->gate->ndim, operation->gate->ndim);
             product_index = (int) log2((1 << (product_index)) * operation->gate->ndim - 1) + 1;
-            printf("product_index post kronecker product: %d\n", product_index);
+
         } else {
             copy_matrix(operation->gate->elements, products[(int) log2(operation->gate->ndim) - 1], operation->gate->ndim, operation->gate->ndim);
             product_index = (int) log2(operation->gate->ndim);
         }
 
-        printf("product_index: %d\n", product_index);
-
-        print_matrix(products[product_index - 1], 1 << (product_index), 1 << (product_index));
         // now for the remaining qubits we kronecker the product at products[product_index - 1] with the identity
 
         for (int j = product_index; j < qc->n_qubits; j++) {
             kronecker_product(products[j - 1], I_gate.elements, products[j], 1 << (j), 1 << (j), 2, 2);
-        }
-
-        printf("--------------------------------\n");
-        print_matrix(products[qc->n_qubits - 1], 1 << (qc->n_qubits), 1 << (qc->n_qubits));
-
-
-        // now we print the amplitudes
-        for (int i = 0; i < qc->n_amplitudes; i++) {
-            printf("|%d> = %f exp(%f i)\n", i, qc->amps[i].r, qc->amps[i].theta);
         }
 
         // build output amps
@@ -181,13 +148,6 @@ void run_qc(qc_t* qc) {
 
         // now we matrix multiply the product with the amplitudes
         matrix_vector_mult(products[qc->n_qubits - 1], qc->amps, output_amps, qc->n_amplitudes);
-
-        printf("--------------------------------\n");
-
-        // now we print the amplitudes
-        for (int i = 0; i < qc->n_amplitudes; i++) {
-            printf("|%d> = %f exp(%f i)\n", i, output_amps[i].r, output_amps[i].theta);
-        }
 
         // copy output amps back to qc->amps
         for (int i = 0; i < qc->n_amplitudes; i++) {
