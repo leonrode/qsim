@@ -206,3 +206,11 @@ void run_qc(qc_t* qc) {
 
 
 }
+
+void print_qc(qc_t* qc) {
+
+
+
+
+
+}

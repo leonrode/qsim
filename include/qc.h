@@ -36,5 +36,6 @@ void swap(qc_t* qc, int qubit_1, int qubit_2);
 void run_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);
 void print_qc_operations(qc_t* qc);
+void print_qc(qc_t* qc);
 
 #endif
