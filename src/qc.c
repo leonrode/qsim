@@ -209,7 +209,28 @@ void run_qc(qc_t* qc) {
 
 void print_qc(qc_t* qc) {
 
+    int MARGIN = 2;
 
+    // for each line we iterate through the operations
+
+    for (int i = 0; i < qc->n_qubits; i++) {
+        printf("|0>-");
+        for (int j = 0; j < qc->n_operations; j++) {
+            operation_t* operation = &qc->operations[j];
+            if (operation->qubit_indices[0] == i) {
+                if (operation->gate->name[0] == 'C') {
+                    printf("•---");
+                } else {
+                    printf("%s---", operation->gate->name);
+                }
+            } else if (operation->n_qubit_indices == 2 && operation->qubit_indices[1] == i) {
+                printf("%c---", operation->gate->name[1]);
+            } else {
+                printf("----");
+            }
+        }
+        printf("\n\n");
+    }
 
 
 
