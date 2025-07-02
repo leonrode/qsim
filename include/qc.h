@@ -32,6 +32,9 @@ void x(qc_t* qc, int qubit_index);
 void h(qc_t* qc, int qubit_index);
 void cx(qc_t* qc, int ctrl_index, int target_index);
 void swap(qc_t* qc, int qubit_1, int qubit_2);
+void rx(qc_t* qc, int qubit_index, double theta);
+void ry(qc_t* qc, int qubit_index, double theta);
+void rz(qc_t* qc, int qubit_index, double theta);
 
 void run_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);

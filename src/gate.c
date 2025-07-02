@@ -1,6 +1,7 @@
 #include "gate.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 /**
  * Initialize gate struct with n dimensions i.e. n x n matrix
@@ -38,7 +39,7 @@ void fill_with_zeros(gate_t* gate) {
     }
 }
 
-void build_controlled_single_qubit_gate(gate_t* u, int m, int num_total_qubits, int control_qubit, int target_qubit, gate_t* output) {
+void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target_qubit, gate_t* output) {
 
     // number of qubits between the control and target
     // e.g. for CX[0, 1] we have n = 0
@@ -116,4 +117,25 @@ void build_swap_gate(gate_t* output, int qubit_1, int qubit_2) {
             else output->elements[i][j] = (polar_t) {1, 0};
         }
     }
+}
+
+void build_rx_gate(gate_t* output, double theta) {
+    output->elements[0][0] = cart_to_polar((cart_t) {cos(theta / 2), 0});
+    output->elements[0][1] = cart_to_polar((cart_t) {0, -sin(theta / 2)});
+    output->elements[1][0] = cart_to_polar((cart_t) {0, -sin(theta / 2)});
+    output->elements[1][1] = cart_to_polar((cart_t) {cos(theta / 2), 0});
+}
+
+void build_ry_gate(gate_t* output, double theta) {
+    output->elements[0][0] = cart_to_polar((cart_t) {cos(theta / 2), 0});
+    output->elements[0][1] = cart_to_polar((cart_t) {0, -sin(theta / 2)});
+    output->elements[1][0] = cart_to_polar((cart_t) {0, sin(theta / 2)});
+    output->elements[1][1] = cart_to_polar((cart_t) {cos(theta / 2), 0});
+}   
+
+void build_rz_gate(gate_t* output, double theta) {
+    output->elements[0][0] = cart_to_polar((cart_t) {cos(theta / 2), -sin(theta / 2)});
+    output->elements[0][1] = cart_to_polar((cart_t) {0, 0});
+    output->elements[1][0] = cart_to_polar((cart_t) {0, 0});
+    output->elements[1][1] = cart_to_polar((cart_t) {cos(theta / 2), sin(theta / 2)});
 }

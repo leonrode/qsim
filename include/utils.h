@@ -13,6 +13,9 @@ extern gate_t H_gate;
 extern gate_t Z_gate;
 extern gate_t CX_gate;
 extern gate_t SWAP_gate;
+extern gate_t RX_gate;
+extern gate_t RY_gate;
+extern gate_t RZ_gate;
 
 void init_gates();
 

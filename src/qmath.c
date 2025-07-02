@@ -67,9 +67,11 @@ polar_t reduce_polar(polar_t a) {
     // puts a's angle between [0, 2pi)
 
     real_t theta_effective = a.theta;
-    if (theta_effective < 0) theta_effective *= -1;
+    if (theta_effective < 0) {
+    theta_effective += 2 * PI;
+}
 
-    theta_effective = theta_effective - (2 * PI * floor(theta_effective / (2 * PI)));
+    theta_effective = fmod(theta_effective, 2 * PI);
 
     return (polar_t) {a.r, theta_effective};
 }

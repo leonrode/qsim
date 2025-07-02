@@ -8,6 +8,9 @@ gate_t H_gate;
 gate_t Z_gate;
 gate_t CX_gate;
 gate_t SWAP_gate;
+gate_t RX_gate;
+gate_t RY_gate;
+gate_t RZ_gate;
 
 void print_polar(polar_t p) {
     printf("(%f)exp(i[%f])\n", p.r, p.theta);
