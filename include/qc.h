@@ -36,6 +36,9 @@ void rx(qc_t* qc, int qubit_index, double theta);
 void ry(qc_t* qc, int qubit_index, double theta);
 void rz(qc_t* qc, int qubit_index, double theta);
 
+// remove global phase within a qc
+void _remove_global_phase(qc_t* qc);
+
 void run_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);
 void print_qc_operations(qc_t* qc);

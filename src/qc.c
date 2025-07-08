@@ -199,13 +199,16 @@ void run_qc(qc_t* qc) {
 
         free(output_amps);
         for (int i = 0; i < qc->n_qubits; i++) {
-            for (int j = 0; j < (1 << i); j++) {
+            for (int j = 0; j < (1 << (i + 1)); j++) {
                 free(products[i][j]);
             }
             free(products[i]);
         }
         free(products);
     }
+
+    _remove_global_phase(qc);
+
 }
 
 void print_qc(qc_t* qc) {
@@ -227,5 +230,20 @@ void print_qc(qc_t* qc) {
             }
         }
         printf("\n\n");
+    }
+}
+
+void _remove_global_phase(qc_t* qc) {
+    // we need to find the first non-zero amplitude
+    for (int i = 0; i < qc->n_amplitudes; i++) {
+        if (qc->amps[i].r != 0) {
+
+            double phase = qc->amps[i].theta;
+            // we need to remove the global phase
+            for (int j = 0; j < qc->n_amplitudes; j++) {
+                qc->amps[j].theta -= phase;
+            }
+            break;
+        }
     }
 }

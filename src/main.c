@@ -14,6 +14,7 @@ int main() {
 
 
     rx(qc, 0, PI / 2);
+    rz(qc, 0, PI / 4);
     print_qc(qc);
 
     print_qc_amplitudes(qc);
