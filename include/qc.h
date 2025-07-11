@@ -2,13 +2,9 @@
 #define QC_H
 
 #include "gate.h"
-
+#include "layer.h"
+#include "operation.h"
 #define MAX_OPERATIONS 100 // max number of operations in a qc_t
-typedef struct {
-    int* qubit_indices;
-    int n_qubit_indices;
-    gate_t* gate;
-} operation_t;
 
 
 /**
@@ -21,6 +17,7 @@ typedef struct {
 
 typedef struct {
     operation_t* operations; // contains gate and applied qubit information in one dimensional array
+    layer_t* layers; // contains the layers of the qc
     polar_t* amps; // 2^n_qubits polar_t representing the amplitudes of the states
     int n_operations;
     int n_qubits;

@@ -5,14 +5,16 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "qc.h"
+// forward declarations
+struct qc_t;
+#include "operation.h"
 
 typedef struct {
     int* qubits;
     int n_qubits;
 } layer_t;
 
-void layer_qc(qc_t* qc, layer_t** layers, int* n_layers);
+void layer_qc(struct qc_t* qc, layer_t** layers, int* n_layers);
 
 // returns 1 if the qubits involved in the operation are already in the layer, 0 otherwise
 int operation_layer_overlap(operation_t* operation, layer_t* layer);
@@ -21,11 +23,6 @@ int operation_layer_overlap(operation_t* operation, layer_t* layer);
 void add_operation_to_layer(operation_t* operation, layer_t* layer);
 
 // adds the layer to the qc
-void add_layer_to_qc(layer_t* layer, qc_t* qc);
+void add_layer_to_qc(layer_t* layer, struct qc_t* qc);
 
-
-
-
-
-
- #endif
+#endif

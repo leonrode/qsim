@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "layer.h"
 #include "qc.h"
 #include "qmath.h"
 #include "utils.h"

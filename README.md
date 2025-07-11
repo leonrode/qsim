@@ -24,6 +24,8 @@ all fundamental code is self-written. no external libraries for linear algebra o
         - achieved by building 2^n x 2^n matrix on a layer-by-layer basis
 - [x] multi-qubit state
 - [ ] building quantum circuits
+    - [ ] circuit layering
+        - involves a greedy algorithm to group the operations by layer
     - [ ] visualizing quantum circuits in stdout
 - [ ] running quantum circuits
     - [ ] final statevector
