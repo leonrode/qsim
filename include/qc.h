@@ -11,14 +11,6 @@ typedef struct {
 } operation_t;
 
 
-// represents a logical layer of a qc
-// all operations in a layer of a qc are applied in parallel
-// for this to work, the set of qubits that are affected by the operations in a layer must be disjoint
-typedef struct {
-    operation_t* operations;
-    int n_operations;
-} _layer_t;
-
 /**
  * --X--H---X
  * -----H---X
@@ -47,8 +39,6 @@ void rz(qc_t* qc, int qubit_index, double theta);
 
 // remove global phase within a qc
 void _remove_global_phase(qc_t* qc);
-
-void _layer_qc(qc_t* qc, _layer_t** layers);
 
 void run_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);

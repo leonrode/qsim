@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "layer.h"
 #include "qc.h"
 #include "qmath.h"
 #include "utils.h"
@@ -20,6 +21,7 @@ int main() {
     print_qc_amplitudes(qc);
     run_qc(qc);
     print_qc_amplitudes(qc);
+
 
     return 0;
 }
