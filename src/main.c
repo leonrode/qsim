@@ -7,21 +7,23 @@
 int main() {
     // initialize gates
     init_gates();
- 
+
     qc_t* qc = malloc(sizeof(qc_t));
-    init_qc(qc, 3);
+    init_qc(qc, 2);
 
     x(qc, 0);
     x(qc, 1);
+
     h(qc, 0);
-
-    h(qc, 2);
-
-    cx(qc, 0,2);
+    cx(qc, 0, 1);
 
     print_qc(qc);
-    print_qc_layers(qc);
 
+    print_qc_amplitudes(qc);
+    run_qc(qc);
+
+    print_qc(qc);
+    print_qc_amplitudes(qc);
 
     return 0;
 }

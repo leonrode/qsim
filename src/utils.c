@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "utils.h"
+#include <stdlib.h>
 
 gate_t I_gate;
 gate_t X_gate;
@@ -60,3 +61,12 @@ void print_matrix(polar_t** matrix, int m, int n) {
     }
 }
 
+void _generate_random_matrix(polar_t*** matrix, int m, int n) {
+    *matrix = calloc(m, sizeof(polar_t*));
+    for (int i = 0; i < m; i++) {
+        (*matrix)[i] = calloc(n, sizeof(polar_t));
+        for (int j = 0; j < n; j++) {
+            (*matrix)[i][j] = (polar_t) {rand() % 100, rand() % 100};
+        }
+    }
+}

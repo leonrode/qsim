@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 bool_t cart_equal(cart_t a, cart_t b) {
      return a.a == b.a && a.b == b.b;
@@ -93,7 +94,13 @@ void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n) {
 // performs kronecker product of matrix a with dimension m * n
 // with matrix b with dimension p * q
 // stores result in c with dimension (m * p) * (n * q)
-void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int p, int q) {
+void kronecker_product(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p, int q) {
+
+    // we set c to a 2D array of size m * p * n * q
+    *c = calloc(m * p, sizeof(polar_t*));
+    for (int i = 0; i < m * p; i++) {
+        (*c)[i] = calloc(n * q, sizeof(polar_t));
+    }
 
     // c is a 2D array of size m * p * n * q
     // we iterate through the blocks each q columns 
@@ -104,7 +111,7 @@ void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int 
             // now we iterate through the p rows and q columns of B
             for (int row = 0; row < p; row++) {
                 for (int col = 0; col < q; col++) {
-                    c[block_y + row][block_x + col] = polar_mult(a[block_y / p][block_x / q], b[row][col]);
+                    (*c)[block_y + row][block_x + col] = polar_mult(a[block_y / p][block_x / q], b[row][col]);
                 }
             }
         }
@@ -119,3 +126,22 @@ void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n) {
     }
 }
 
+void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p) {
+
+    // allocate a m * p matrix at c
+
+    *c = calloc(m, sizeof(polar_t*));
+
+    for (int i = 0; i < m; i++) { // allocate m rows
+        (*c)[i] = calloc(p, sizeof(polar_t)); // allocate p polar_t for each row
+    }
+
+    // multiply the matrices
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < p; j++) {
+            for (int k = 0; k < n; k++) {
+                (*c)[i][j] = polar_add((*c)[i][j], polar_mult(a[i][k], b[k][j]));
+            }
+        }
+    }
+}

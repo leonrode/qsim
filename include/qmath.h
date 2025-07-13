@@ -52,11 +52,16 @@ bool_t equals(real_t a, real_t b);
 void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n);
 
 // a is m * n, b is p * q, c is (m * p) * (n * q) matrix
-void kronecker_product(polar_t** a, polar_t** b, polar_t** c, int m, int n, int p, int q);
+// c will be dynamically allocated and stored at the pointer c
+void kronecker_product(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p, int q);
 
 // a and b are m * n matrices, c is m * n matrix
 void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n);
 
+// a is m * n, b is n * p, and c is m * p matrix
+// that will be dynamically allocated and stored
+// at the pointer c
+void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p);
 
 
 #endif

@@ -68,14 +68,8 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
 
     // we init product of size N/2
     polar_t** product = malloc(N/2 * sizeof(polar_t*));
-    for (int i = 0; i < N/2; i++) {
-        product[i] = malloc(N/2 * sizeof(polar_t));
-        for (int j = 0; j < N/2; j++) {
-            product[i][j] = (polar_t) {0, 0};
-        }
-    }
 
-    kronecker_product(IN_4, u->elements, product, N/4, N/4, u->ndim, u->ndim);
+    kronecker_product(IN_4, u->elements, &product, N/4, N/4, u->ndim, u->ndim);
 
     // copy product into bottom right corner
     for (int i = 0; i < N/2; i++) {
