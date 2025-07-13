@@ -9,22 +9,16 @@
 // #include "qc.h"
 
 typedef struct {
-    operation_t* operations;
-    int n_operations; // number of operations in the layer
-    int* qubits; // qubits acted on in the layer. the number of qubits in this array is <= the size of the qc
-    int n_qubits; // number of qubits acted on in the layer
+    int* qubits; // qubits acted on by operations in the layer
+    int n_qubits; // height of layer (always equal to thenumber of qubits in the qc)
+    operation_t* operations; // operations within the layer
+    int n_operations; // number of operations within the layer
 } layer_t;
 
-void layer_qc(struct qc_t* qc, layer_t** layers, int* n_layers);
+void init_layer(layer_t* layer, int n_qubits);
 
 // returns 1 if the qubits involved in the operation are already in the layer, 0 otherwise
 int operation_layer_overlap(operation_t* operation, layer_t* layer);
 
-// adds the operation to the layer, performing reallocation if necessary
-// assumes that the operation does not overlap with the layer
-void add_operation_to_layer(operation_t* operation, layer_t* layer);
-
-// adds the layer to the qc
-// void add_layer_to_qc(layer_t* layer, qc_t* qc);
 
 #endif
