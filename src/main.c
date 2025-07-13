@@ -1,25 +1,26 @@
 #include <stdio.h>
 #include "qc.h"
-#include "qmath.h"
 #include "utils.h"
 #include <stdlib.h>
+#include "gate.h"
 
 int main() {
-
-
+    // initialize gates
     init_gates();
  
     qc_t* qc = malloc(sizeof(qc_t));
-    init_qc(qc, 1);
+    init_qc(qc, 3);
 
+    x(qc, 0);
+    x(qc, 1);
+    h(qc, 0);
 
-    rx(qc, 0, PI / 2);
-    rz(qc, 0, PI / 4);
+    h(qc, 2);
+
+    cx(qc, 0,2);
+
     print_qc(qc);
-
-    print_qc_amplitudes(qc);
-    run_qc(qc);
-    print_qc_amplitudes(qc);
+    print_qc_layers(qc);
 
 
     return 0;
