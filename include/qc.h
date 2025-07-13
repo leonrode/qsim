@@ -1,7 +1,6 @@
 #ifndef QC_H
 #define QC_H
 
-#include "gate.h"
 #include "layer.h"
 #include "operation.h"
 #define MAX_OPERATIONS 100 // max number of operations in a qc_t

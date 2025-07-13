@@ -26,6 +26,7 @@ all fundamental code is self-written. no external libraries for linear algebra o
 - [ ] building quantum circuits
     - [ ] circuit layering
         - involves a greedy algorithm to group the operations by layer
+        - [ ] optimize reallocation for layering
     - [ ] visualizing quantum circuits in stdout
 - [ ] running quantum circuits
     - [ ] final statevector
