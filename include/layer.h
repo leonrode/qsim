@@ -20,5 +20,6 @@ void init_layer(layer_t* layer, int n_qubits);
 // returns 1 if the qubits involved in the operation are already in the layer, 0 otherwise
 int operation_layer_overlap(operation_t* operation, layer_t* layer);
 
+int layer_full(layer_t* layer);
 
 #endif

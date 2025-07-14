@@ -22,3 +22,11 @@ int operation_layer_overlap(operation_t* operation, layer_t* layer) {
     return 0;
 }
 
+int layer_full(layer_t *layer) {
+    for (int i = 0; i < layer->n_qubits; i++) {
+        if (layer->qubits[i] == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}

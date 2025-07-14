@@ -27,6 +27,7 @@ void init_qc(qc_t* qc, int n_qubits);
 void add_operation(qc_t* qc, operation_t* operation);
 void x(qc_t* qc, int qubit_index);
 void h(qc_t* qc, int qubit_index);
+void z(qc_t* qc, int qubit_index);
 void cx(qc_t* qc, int ctrl_index, int target_index);
 void swap(qc_t* qc, int qubit_1, int qubit_2);
 void rx(qc_t* qc, int qubit_index, double theta);

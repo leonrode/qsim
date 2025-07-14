@@ -41,7 +41,19 @@ void add_operation(qc_t* qc, operation_t* operation) {
     } else {
         int layer_fit_index = -1;
 
-        for (int i = 0; i < qc->n_layers; i++) {
+        int start_index = 0;
+
+        // we find the last full layer and then search from there
+
+        for (int i = qc->n_layers - 1; i >= 0; i--) {
+            // all qubits in used
+            if (layer_full(&qc->layers[i])) {
+                start_index = i;
+                break;
+            }
+        }
+
+        for (int i = start_index; i < qc->n_layers; i++) {
             if (operation_layer_overlap(operation, &qc->layers[i]) == 0) {
                 layer_fit_index = i;
                 break;
@@ -92,6 +104,15 @@ void h(qc_t* qc, int qubit_index) {
     op->qubit_indices[0] = qubit_index;
     op->n_qubit_indices = 1;
     op->gate = &H_gate;
+    add_operation(qc, op);
+}
+
+void z(qc_t* qc, int qubit_index) {
+    operation_t* op = calloc(1, sizeof(operation_t));
+    op->qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
+    op->qubit_indices[0] = qubit_index;
+    op->n_qubit_indices = 1;
+    op->gate = &Z_gate;
     add_operation(qc, op);
 }
 
@@ -178,17 +199,6 @@ void rz(qc_t* qc, int qubit_index, double theta) {
     op->n_qubit_indices = 1;
     add_operation(qc, op);
 }
-
-// void print_qc_operations(qc_t* qc) {
-//     for (int i = 0; i < qc->n_operations; i++) {
-//         operation_t* operation = &qc->operations[i];
-//         printf("Applying gate %s to qubits: ", operation->gate->name);
-//         for (int j = 0; j < operation->n_qubit_indices; j++) {
-//             printf("%d ", operation->qubit_indices[j]);
-//         }
-//         printf("\n");
-//     }
-// }
 
 void print_qc_amplitudes(qc_t* qc) {
     for (int i = 0; i < qc->n_amplitudes; i++) {

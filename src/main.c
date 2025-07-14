@@ -17,6 +17,8 @@ int main() {
     h(qc, 0);
     cx(qc, 0, 1);
 
+
+    z(qc, 1);
     print_qc(qc);
 
     print_qc_amplitudes(qc);
