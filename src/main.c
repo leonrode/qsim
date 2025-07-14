@@ -19,13 +19,14 @@ int main() {
 
 
     z(qc, 1);
-    print_qc(qc);
 
     print_qc_amplitudes(qc);
     run_qc(qc);
 
     print_qc(qc);
     print_qc_amplitudes(qc);
+
+    free_qc(qc);
 
     return 0;
 }

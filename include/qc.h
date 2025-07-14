@@ -16,7 +16,7 @@
  */
 
 typedef struct {
-    layer_t* layers; // contains the layers of the qc
+    layer_t** layers; // contains the layers of the qc
     int n_layers;
     polar_t* amps; // 2^n_qubits polar_t representing the amplitudes of the states
     int n_qubits;
@@ -24,6 +24,7 @@ typedef struct {
 } qc_t;
 
 void init_qc(qc_t* qc, int n_qubits);
+void free_qc(qc_t* qc);
 void add_operation(qc_t* qc, operation_t* operation);
 void x(qc_t* qc, int qubit_index);
 void h(qc_t* qc, int qubit_index);

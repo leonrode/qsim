@@ -9,4 +9,6 @@ typedef struct {
     gate_t* gate;
 } operation_t;
 
+void free_operation(operation_t* operation);
+
 #endif 

@@ -11,6 +11,7 @@ typedef struct {
 
 
 void new_gate(gate_t* gate, int n, char* name);
+void free_gate(gate_t* gate);
 void print_gate(gate_t* gate);
 void fill_with_zeros(gate_t* gate);
 

@@ -14,7 +14,7 @@ TEST_DEPS = $(filter-out $(BUILD_DIR)main.o, $(OBJECTS))
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -I$(INCLUDE_DIR)
+CFLAGS = -Wall -Wextra -I$(INCLUDE_DIR) -g
 TARGET = qsim
 TEST_TARGET = tests
 

@@ -18,6 +18,10 @@ void new_gate(gate_t* gate, int n, char* name) {
     }
 }
 
+void free_gate(gate_t* gate) {
+    free(gate);
+}
+
 void print_gate(gate_t* gate) {
     printf("Gate: %s\n", gate->name);
     for (int r = 0; r < gate->ndim; r++) {
@@ -67,7 +71,7 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
     }
 
     // we init product of size N/2
-    polar_t** product = malloc(N/2 * sizeof(polar_t*));
+    polar_t** product = NULL;  // let kronecker_product allocate it
 
     kronecker_product(IN_4, u->elements, &product, N/4, N/4, u->ndim, u->ndim);
 
@@ -77,6 +81,15 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
             output->elements[i + N/2][j + N/2] = product[i][j];
         }
     }
+
+    for (int i = 0; i < N/2; i++) {
+        free(IN_4[i]);
+    }
+    free(IN_4);
+    for (int i = 0; i < N/2; i++) {
+        free(product[i]);
+    }
+    free(product);
 
 }
 

@@ -94,6 +94,7 @@ void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n) {
 // performs kronecker product of matrix a with dimension m * n
 // with matrix b with dimension p * q
 // stores result in c with dimension (m * p) * (n * q)
+// allocated here
 void kronecker_product(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p, int q) {
 
     // we set c to a 2D array of size m * p * n * q
