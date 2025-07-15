@@ -12,6 +12,7 @@ void init_qc(qc_t* qc, int n_qubits) {
     qc->layers = malloc(MAX_LAYERS * sizeof(layer_t));
 
     qc->n_amplitudes = pow(2, n_qubits);
+    qc->probabilities = calloc(qc->n_qubits, sizeof(int));
     qc->amps = malloc(qc->n_amplitudes * sizeof(polar_t));
     // initialize |00...0> to 1 and all other amplitudes to 0
     qc->amps[0] = (polar_t) {1, 0};
@@ -25,9 +26,12 @@ void free_qc(qc_t* qc) {
     for (int i = 0; i < qc->n_layers; i++) {
         free_layer(qc->layers[i]);
     }
+    free(qc->probabilities);
     free(qc->layers);
     free(qc);
 }
+
+
 
 void add_operation(qc_t* qc, operation_t* operation) {
     if (qc->n_layers == 0) {
@@ -222,6 +226,8 @@ void run_qc(qc_t* qc) {
 
         int product_dim = 1; // product is currently product_dim * product_dim
 
+        // printf("Layer %d:\n", i);
+
         while (qubit_index < qc->n_qubits) {
             if (qc->layers[i]->qubits[qubit_index] == 1) {
 
@@ -235,15 +241,22 @@ void run_qc(qc_t* qc) {
                         }
                     }
                 }
-
+                // printf("Operation: %s on qubit %d\n", operation->gate->name, qubit_index);
                 if (operation != NULL) { // should never be null
                     // if product is null, we set product to the operation matrix
                     if (product == NULL) {
-                        product = operation->gate->elements;
+                        // product = operation->gate->elements;
+                        product = malloc(operation->gate->ndim * sizeof(polar_t*));
+                        for (int k = 0; k < operation->gate->ndim; k++) {
+                            product[k] = malloc(operation->gate->ndim * sizeof(polar_t));
+                        }
+                        copy_matrix(operation->gate->elements, product, operation->gate->ndim, operation->gate->ndim);
+                        // printf("Copied into product\n");
                         product_dim = operation->gate->ndim;
                         qubit_index += operation->n_qubit_indices;
                     }  else {
                         // product is not null and we multiply the product with the operation
+                        // printf("Multiplying product with operation\n");
 
                         polar_t** new_product;
                         kronecker_product(product, operation->gate->elements, &new_product, product_dim, product_dim, operation->gate->ndim, operation->gate->ndim);
@@ -254,8 +267,15 @@ void run_qc(qc_t* qc) {
                     }
                 }
             } else {
+                // printf("No operation on qubit %d\n", qubit_index);
                 if (product == NULL){
-                    product = I_gate.elements;
+                    // printf("Setting product to identity\n");
+                    product = malloc(2 * sizeof(polar_t*));
+                    for (int k = 0; k < 2; k++) {
+                        product[k] = malloc(2 * sizeof(polar_t));
+                    }
+
+                    copy_matrix(I_gate.elements, product, 2, 2);
                     product_dim = 2;
                     qubit_index++;
                 } else {
@@ -278,8 +298,9 @@ void run_qc(qc_t* qc) {
             new_amps[i] = (polar_t) {qc->amps[i].r, qc->amps[i].theta};
 
         }
+        // printf("Doing matrix vector mult\n");
         matrix_vector_mult(product, qc->amps, new_amps, product_dim);
-
+        // printf("New amps:\n");
         // copy new_amps to qc->amps
         for (int i = 0; i < product_dim; i++) {
             qc->amps[i] = (polar_t) {new_amps[i].r, new_amps[i].theta};
@@ -340,5 +361,25 @@ void _remove_global_phase(qc_t* qc) {
             }
             break;
         }
+    }
+}
+
+float _probability_of_qubit(qc_t* qc, int qubit_index) {
+
+    // for a given qubit we sum the squares of the amplitudes of the states that have a 1 in the qubit
+    float sum = 0;
+    for (int i = 0; i < qc->n_amplitudes; i++) {
+        if (i & (1 << (qc->n_qubits - qubit_index - 1))) {
+            sum += qc->amps[i].r * qc->amps[i].r;
+        }
+    }
+    return sum;
+}
+
+
+void print_qc_probabilities(qc_t* qc) {
+    for (int i = 0; i < qc->n_qubits; i++) {
+        qc->probabilities[i] = _probability_of_qubit(qc, i);
+        printf("Probability of qubit %d being 1: %f\n", i, qc->probabilities[i]);
     }
 }

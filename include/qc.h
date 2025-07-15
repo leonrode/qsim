@@ -21,6 +21,7 @@ typedef struct {
     polar_t* amps; // 2^n_qubits polar_t representing the amplitudes of the states
     int n_qubits;
     int n_amplitudes; // we don't want to have to calculate this every time
+    float* probabilities; // probabilities of a given qubit being 1
 } qc_t;
 
 void init_qc(qc_t* qc, int n_qubits);
@@ -37,11 +38,14 @@ void rz(qc_t* qc, int qubit_index, double theta);
 
 // remove global phase within a qc
 void _remove_global_phase(qc_t* qc);
+float _probability_of_qubit(qc_t* qc, int qubit_index);
 
 void run_qc(qc_t* qc);
+void measure_qc(qc_t* qc);
 void print_qc_amplitudes(qc_t* qc);
 void print_qc_operations(qc_t* qc);
 void print_qc(qc_t* qc);
+void print_qc_probabilities(qc_t* qc);
 
 void print_qc_layers(qc_t* qc);
 
