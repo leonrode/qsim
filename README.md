@@ -63,6 +63,8 @@ The statevector is initialized to all 0's as per the typical convention, and for
 - [x] running quantum circuits
     - [x] final statevector
     - [x] qubit probabilities
+- [x] run Deutsch-Josza 
+    - 2-qubit case with CX for the balanced function unitary and I for constant function unitary
 
 ## References
 
