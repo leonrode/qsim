@@ -37,6 +37,32 @@ The statevector is initialized to all 0's as per the typical convention, and for
 
 ## Notes
 
+### File Structure
+
+```
+qsim
+├── include
+│   ├── gate.h              // gate_t object
+│   ├── layer.h             // layer_t object
+│   ├── operation.h         // operation_t object
+│   ├── qc.h                // high level quantum circuit object qc_t
+│   ├── qmath.h             // math with complex numbers, matrices
+│   └── utils.h             // utility functions
+├── Makefile
+├── public                  // README dependencies
+│   ├── architecture.png
+│   └── layers.png
+├── README.md
+└── src
+    ├── gate.c
+    ├── layer.c
+    ├── main.c
+    ├── operation.c
+    ├── qc.c
+    ├── qmath.c
+    └── utils.c
+```
+
 ### Learning points
 
 1. `make` for building and then cleaning the repository
