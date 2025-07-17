@@ -69,9 +69,10 @@ void _generate_random_matrix(polar_t*** matrix, int m, int n) {
 }
 
 char* decimal_to_binary(int decimal, int length) {
-    char* binary = calloc(length, sizeof(char));
+    char* binary = calloc(length + 1, sizeof(char)); // +1 for null terminator
     for (int i = 0; i < length; i++) {
-        binary[i] = (decimal & (1 << i)) ? '1' : '0';
+        binary[i] = (decimal & (1 << (length - 1 - i))) ? '1' : '0';
     }
+    binary[length] = '\0';
     return binary;
 }

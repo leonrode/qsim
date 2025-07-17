@@ -188,6 +188,7 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
 
     gate_t* x_gate = malloc(sizeof(gate_t));
     new_gate(x_gate, 2, "X");
+    build_x_gate(x_gate);
     build_controlled_single_qubit_gate(x_gate,ctrl_index, target_index, cx_gate);
 
     free_gate(x_gate);
@@ -289,30 +290,32 @@ void qft(qc_t* qc, int start_qubit, int end_qubit) {
         h(qc, i);
 
         for (int j = i + 1; j <= end_qubit; j++) {
-            // swap(qc, i, j);
-            gate_t* rz = malloc(sizeof(gate_t));
-            new_gate(rz, 2, "RZ");
-            rz->ndim = 2;
-            build_rz_gate(rz, 2 * PI / (1 << (j - i)));
+            swap(qc, i, j);
+            gate_t* ps = malloc(sizeof(gate_t));
+            new_gate(ps, 2, "PS");
+
+            ps->ndim = 2;
+            build_phase_shift_gate(ps, PI / (1 << (j - i)));
+            // build_rz_gate(rz, 2 * PI / (1 << (j - i)));
 
 
-            gate_t* crz = malloc(sizeof(gate_t));
-            new_gate(crz, 1 << (j - i + 1), "CRZ");
-            build_controlled_single_qubit_gate(rz, i, j, crz);
-            crz->ndim = 1 << (j - i + 1);
+            gate_t* crps = malloc(sizeof(gate_t));
+            new_gate(crps, 1 << (j - i + 1), "CRPS");
+            build_controlled_single_qubit_gate(ps, i, j, crps);
+            crps->ndim = 1 << (j - i + 1);
             
-            free_gate(rz);
-            free(rz);
+            free_gate(ps);
+            free(ps);
             
             operation_t* op = calloc(1, sizeof(operation_t));
-            op->gate = crz;
+            op->gate = crps;
             op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
             for (int k = i; k <= j; k++) {
                 op->qubit_indices[k] = 1;
             }
             op->n_qubit_indices = qc->n_qubits;
             add_operation(qc, op);
-            // swap(qc, i, j);
+            swap(qc, i, j);
         }
     }
 }
@@ -520,7 +523,7 @@ float _probability_of_qubit(qc_t* qc, int qubit_index) {
     // for a given qubit we sum the squares of the amplitudes of the states that have a 1 in the qubit
     float sum = 0;
     for (int i = 0; i < qc->n_amplitudes; i++) {
-        if (i & (1 << (qubit_index))) {
+        if (i & (1 << (qc->n_qubits - qubit_index - 1))) {
             sum += qc->amps[i].r * qc->amps[i].r;
         }
     }
@@ -536,11 +539,41 @@ void print_qc_probabilities(qc_t* qc) {
 }
 
 void print_qc_amplitude_probabilities(qc_t* qc) {
+    printf("|");
+    for (int i = 0; i < qc->n_qubits; i++) {
+        printf("q%d", i);
+    }
+    printf(">\n");
     for (int i = 0; i < qc->n_amplitudes; i++) {
-        printf("|%s> = %f exp(%f i) with probability %f\n", decimal_to_binary(i, qc->n_qubits), qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
+        printf("|%d> = |%s> = %f exp(%f i) with probability %f\n", i, decimal_to_binary(i, qc->n_qubits), qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
     }
 }
 
-void print_qc_amplitude_probabilities_range(qc_t* qc, int start_qubit, int end_qubit) {
+void print_qc_amplitude_probabilities_range(qc_t* qc, int start_qubit_index, int end_qubit_index) {
+
+    // we need to iterate through the nubmers from 0 to 2^ (end_qubit_index - start_qubit_index + 1)
+    printf("Measuring qubits %d to %d: ", start_qubit_index, end_qubit_index);
+    printf("|");
+    for (int j = 0; j < end_qubit_index - start_qubit_index + 1; j++) {
+        printf("q%d", j);
+    }
+    printf(">\n");
+    for (int i = 0; i < 1 << (end_qubit_index - start_qubit_index + 1); i++) {
+
+        double sum = 0;
+
+        for (int j = 0; j < qc->n_amplitudes; j++) {
+            if (((j >> (qc->n_qubits - end_qubit_index - 1)) ^ i) == 0) {
+                sum += qc->amps[j].r * qc->amps[j].r;
+            }
+        }
+
+ 
+        printf("|%d> = |%s> = probability %f\n", i, decimal_to_binary(i, end_qubit_index - start_qubit_index + 1), sum);
+
+
+        }
+        // then we iterate through the amplitudes and 
+    
 
 }
