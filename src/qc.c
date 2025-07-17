@@ -540,3 +540,7 @@ void print_qc_amplitude_probabilities(qc_t* qc) {
         printf("|%s> = %f exp(%f i) with probability %f\n", decimal_to_binary(i, qc->n_qubits), qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
     }
 }
+
+void print_qc_amplitude_probabilities_range(qc_t* qc, int start_qubit, int end_qubit) {
+
+}

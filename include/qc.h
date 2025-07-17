@@ -55,6 +55,8 @@ void print_qc(qc_t* qc);
 void print_qc_probabilities(qc_t* qc);
 void print_qc_amplitude_probabilities(qc_t* qc);
 
+void print_qc_amplitude_probabilities_range(qc_t* qc, int start_qubit, int end_qubit);
+
 void print_qc_layers(qc_t* qc);
 
 #endif
