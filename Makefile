@@ -15,7 +15,9 @@ TEST_DEPS = $(filter-out $(BUILD_DIR)main.o, $(OBJECTS))
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -I$(INCLUDE_DIR) -g
+DEBUG_CFLAGS = -Wall -Wextra -I$(INCLUDE_DIR) -g -O0 -DDEBUG
 TARGET = qsim
+DEBUG_TARGET = qsim_debug
 TEST_TARGET = tests
 
 # Default target
@@ -28,6 +30,12 @@ $(BUILD_DIR):
 # Main executable
 $(TARGET): $(BUILD_DIR) $(OBJECTS)
 	$(CC) $(OBJECTS) -o $(TARGET)
+
+# Debug executable
+debug: $(DEBUG_TARGET)
+
+$(DEBUG_TARGET): $(BUILD_DIR) $(OBJECTS)
+	$(CC) $(DEBUG_CFLAGS) $(OBJECTS) -o $(DEBUG_TARGET)
 
 # Test executable
 $(TEST_TARGET): $(BUILD_DIR) $(TEST_OBJECTS) $(TEST_DEPS)
@@ -43,10 +51,10 @@ $(BUILD_DIR)%.o: %.c
 
 # Clean targets
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET) $(TEST_TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(DEBUG_TARGET) $(TEST_TARGET)
 
 clean_tests:
 	rm -f $(TEST_TARGET) $(TEST_OBJECTS)
 
 # Phony targets
-.PHONY: all clean clean_tests
+.PHONY: all debug clean clean_tests

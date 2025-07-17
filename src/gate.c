@@ -19,7 +19,23 @@ void new_gate(gate_t* gate, int n, char* name) {
 }
 
 void free_gate(gate_t* gate) {
-    free(gate);
+    for (int i = 0; i < gate->ndim; i++) {
+        free(gate->elements[i]);
+    }
+    
+    free(gate->elements);
+}
+
+void copy_gate(gate_t* src, gate_t* dest) {
+    dest->ndim = src->ndim;
+    dest->name = src->name;
+    dest->elements = malloc(src->ndim * sizeof(polar_t*));
+    for (int i = 0; i < src->ndim; i++) {
+        dest->elements[i] = malloc(src->ndim * sizeof(polar_t));
+        for (int j = 0; j < src->ndim; j++) {
+            dest->elements[i][j] = src->elements[i][j];
+        }
+    }
 }
 
 void print_gate(gate_t* gate) {
@@ -42,6 +58,39 @@ void fill_with_zeros(gate_t* gate) {
         }
     }
 }
+
+void build_i_gate(gate_t* gate) {
+    gate->elements[0][0] = (polar_t) {1, 0};
+    gate->elements[0][1] = (polar_t) {0, 0};
+    gate->elements[1][0] = (polar_t) {0, 0};
+    gate->elements[1][1] = (polar_t) {1, 0};
+}
+
+void build_h_gate(gate_t* gate) {
+    gate->elements[0][0] = (polar_t) {1/sqrt(2), 0};
+    gate->elements[0][1] = (polar_t) {1/sqrt(2), 0};
+    gate->elements[1][0] = (polar_t) {1/sqrt(2), 0};
+    gate->elements[1][1] = (polar_t) {-1/sqrt(2), 0};
+}
+
+void build_x_gate(gate_t* gate) {
+    gate->elements[0][0] = (polar_t) {0, 0};
+    gate->elements[0][1] = (polar_t) {1, 0};
+    gate->elements[1][0] = (polar_t) {1, 0};
+    gate->elements[1][1] = (polar_t) {0, 0};
+}
+
+void build_z_gate(gate_t* gate) {
+    gate->elements[0][0] = (polar_t) {1, 0};
+    gate->elements[0][1] = (polar_t) {0, 0};
+    gate->elements[1][0] = (polar_t) {0, 0};
+    gate->elements[1][1] = (polar_t) {-1, 0};
+}
+
+
+
+
+
 
 void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target_qubit, gate_t* output) {
 
@@ -82,7 +131,8 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
         }
     }
 
-    for (int i = 0; i < N/2; i++) {
+
+    for (int i = 0; i < N/4; i++) {
         free(IN_4[i]);
     }
     free(IN_4);
@@ -104,25 +154,37 @@ void build_swap_gate(gate_t* output, int qubit_1, int qubit_2) {
 
     int n = qubit_2 - qubit_1 + 1;
     int N = 1 << n;
+    int relative_qubit_1 = 0;
+    int relative_qubit_2 = qubit_2 - qubit_1; // This is the offset from qubit_1
 
-
+    // Initialize all elements to zero
     for (int i = 0; i < N; i++) {
-        // we want to find the number after swapping the qubit_1'th and qubit_2'th bits in i
-        // note that we are in little endian
-        // qubit1'th bit
-        int qubit1_bit = (i >> qubit_1) & 1;
-        int qubit2_bit = (i >> qubit_2) & 1;
-
-
-        int swap = i;
-        if (qubit1_bit != qubit2_bit) {
-            swap ^= (1 << qubit1_bit) | (1 << qubit2_bit);
-        }
-
         for (int j = 0; j < N; j++) {
-            if (j != swap) output->elements[i][j] = (polar_t) {0, 0};
-            else output->elements[i][j] = (polar_t) {1, 0};
+            output->elements[i][j] = (polar_t) {0, 0};
         }
+    }
+
+    // Populate the matrix
+    for (int i = 0; i < N; i++) {
+        // Get the bits at the *relative* positions within the current index 'i'
+        int bit_at_rel_q1 = (i >> relative_qubit_1) & 1;
+        int bit_at_rel_q2 = (i >> relative_qubit_2) & 1;
+
+        int swapped_i = i; // Start with the original index
+
+        // Only swap if the bits are different
+        if (bit_at_rel_q1 != bit_at_rel_q2) {
+            // Clear the bit at relative_qubit_1 position and set it to bit_at_rel_q2
+            swapped_i &= ~(1 << relative_qubit_1);
+            swapped_i |= (bit_at_rel_q2 << relative_qubit_1);
+
+            // Clear the bit at relative_qubit_2 position and set it to bit_at_rel_q1
+            swapped_i &= ~(1 << relative_qubit_2);
+            swapped_i |= (bit_at_rel_q1 << relative_qubit_2);
+        }
+
+        // Place the 1 at the (i, swapped_i) position
+        output->elements[i][swapped_i] = (polar_t) {1, 0};
     }
 }
 
@@ -145,4 +207,11 @@ void build_rz_gate(gate_t* output, double theta) {
     output->elements[0][1] = cart_to_polar((cart_t) {0, 0});
     output->elements[1][0] = cart_to_polar((cart_t) {0, 0});
     output->elements[1][1] = cart_to_polar((cart_t) {cos(theta / 2), sin(theta / 2)});
+}
+
+void build_phase_shift_gate(gate_t* output, double theta) {
+    output->elements[0][0] = (polar_t) {1, 0};
+    output->elements[0][1] = (polar_t) {0, 0};
+    output->elements[1][0] = (polar_t) {0, 0};
+    output->elements[1][1] = (polar_t) {1, theta};
 }

@@ -35,6 +35,13 @@ void swap(qc_t* qc, int qubit_1, int qubit_2);
 void rx(qc_t* qc, int qubit_index, double theta);
 void ry(qc_t* qc, int qubit_index, double theta);
 void rz(qc_t* qc, int qubit_index, double theta);
+void qft(qc_t* qc, int start_qubit, int end_qubit);
+void phase_shift(qc_t* qc, int qubit_index, double theta);
+
+void adjoint_qc(qc_t* qc_in, qc_t* qc_out);
+
+// appends all operations of src to dest
+void append_qc(qc_t* src, qc_t* dest);
 
 // remove global phase within a qc
 void _remove_global_phase(qc_t* qc);
@@ -46,6 +53,7 @@ void print_qc_amplitudes(qc_t* qc);
 void print_qc_operations(qc_t* qc);
 void print_qc(qc_t* qc);
 void print_qc_probabilities(qc_t* qc);
+void print_qc_amplitude_probabilities(qc_t* qc);
 
 void print_qc_layers(qc_t* qc);
 

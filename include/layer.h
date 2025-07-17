@@ -9,7 +9,7 @@
 // #include "qc.h"
 
 typedef struct {
-    int* qubits; // qubits acted on by operations in the layer
+    int* qubits; // for qubit i (0 ≤ i < n_qubits), qubits[i] = 1 if qubit i is acted on by an operation in the layer, 0 otherwise
     int n_qubits; // height of layer (always equal to thenumber of qubits in the qc)
     operation_t** operations; // operations within the layer
     int n_operations; // number of operations within the layer

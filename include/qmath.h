@@ -63,5 +63,8 @@ void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n);
 // at the pointer c
 void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p);
 
+// raises a to the power of power and stores the result in b
+void matrix_power(polar_t** a, polar_t*** b, int n, int power);
+
 
 #endif

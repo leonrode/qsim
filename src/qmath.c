@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "utils.h"
 
 bool_t cart_equal(cart_t a, cart_t b) {
      return a.a == b.a && a.b == b.b;
@@ -128,20 +129,74 @@ void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n) {
 
 void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p) {
 
-    // allocate a m * p matrix at c
-
-    *c = calloc(m, sizeof(polar_t*));
-
-    for (int i = 0; i < m; i++) { // allocate m rows
-        (*c)[i] = calloc(p, sizeof(polar_t)); // allocate p polar_t for each row
-    }
-
     // multiply the matrices
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < p; j++) {
+            (*c)[i][j] = (polar_t) {0, 0};
             for (int k = 0; k < n; k++) {
                 (*c)[i][j] = polar_add((*c)[i][j], polar_mult(a[i][k], b[k][j]));
             }
         }
     }
+}
+
+void matrix_power(polar_t** a, polar_t*** b, int n, int power) {
+
+    // calloc b
+    *b = calloc(n, sizeof(polar_t*));
+    for (int i = 0; i < n; i++) {
+        (*b)[i] = calloc(n, sizeof(polar_t));
+    }
+
+    // --- For power > 1, iterative multiplication ---
+
+    // 1. Initialize 'current_result' with 'a' (A^1)
+    polar_t** current_result = calloc(n, sizeof(polar_t*));
+    for (int i = 0; i < n; i++) {
+        current_result[i] = calloc(n, sizeof(polar_t));
+        for (int j = 0; j < n; j++) {
+            current_result[i][j] = a[i][j];
+        }
+    }
+
+    // 2. Create a temporary matrix to store intermediate products
+    polar_t** temp_product = calloc(n, sizeof(polar_t*));
+    for (int i = 0; i < n; i++) {
+        temp_product[i] = calloc(n, sizeof(polar_t));
+    }
+
+    // Multiply 'current_result' by 'a' for (power - 1) times
+    // (Loop starts from 2 because current_result already holds A^1)
+    for (int i = 2; i <= power; i++) {
+        // Calculate current_result * a and store in temp_product
+        // Use matrix_mult(current_matrix, matrix_to_multiply_by, &result_matrix_ptr, ...)
+        matrix_mult(current_result, a, &temp_product, n, n, n);
+
+
+        // Copy the content of temp_product back to current_result for the next iteration
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                current_result[i][j] = temp_product[i][j];
+            }
+        }
+    }
+
+
+    // Copy the final result from current_result to the output matrix 'b'
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            (*b)[i][j] = current_result[i][j];
+        }
+    }
+
+    // Clean up temporary matrices
+    for (int i = 0; i < n; i++) {
+        free(temp_product[i]);
+    }
+    free(temp_product);
+
+    for (int i = 0; i < n; i++) {
+        free(current_result[i]);
+    }
+    free(current_result);
 }

@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "qc.h"
 #include "layer.h"
+#include <string.h>
 
 void init_qc(qc_t* qc, int n_qubits) {
     qc->n_qubits = n_qubits;
@@ -25,14 +26,37 @@ void free_qc(qc_t* qc) {
     free(qc->amps);
     for (int i = 0; i < qc->n_layers; i++) {
         free_layer(qc->layers[i]);
+        free(qc->layers[i]);
     }
     free(qc->probabilities);
     free(qc->layers);
     free(qc);
 }
 
+void adjoint_qc(qc_t* qc_in, qc_t* qc_out) {
 
+    // we copy everything in reverse order
+    for (int i = qc_in->n_layers - 1; i >= 0; i--) {
+        // we need to copy the layer to the output qc
+        layer_t* new_layer = malloc(sizeof(layer_t));
+        init_layer(new_layer, qc_in->n_qubits);
+        for (int j = 0; j < qc_in->layers[i]->n_operations; j++) {
+            operation_t* new_operation = malloc(sizeof(operation_t));
+            copy_operation(qc_in->layers[i]->operations[j], new_operation);
+            add_operation(qc_out, new_operation);
+        }
+    }
+}
 
+void append_qc(qc_t* src, qc_t* dest) {
+    for (int i = 0; i < src->n_layers; i++) {
+        for (int j = 0; j < src->layers[i]->n_operations; j++) {
+            operation_t* new_operation = malloc(sizeof(operation_t));
+            copy_operation(src->layers[i]->operations[j], new_operation);
+            add_operation(dest, new_operation);
+        }
+    }
+}
 void add_operation(qc_t* qc, operation_t* operation) {
     if (qc->n_layers == 0) {
         // create a new layer and add the operation to it
@@ -42,8 +66,11 @@ void add_operation(qc_t* qc, operation_t* operation) {
         new_layer->n_operations = 1;
         // add qubits operated on by the operation to the layer
         for (int i = 0; i < operation->n_qubit_indices; i++) {
-            new_layer->qubits[operation->qubit_indices[i]] = 1;
+            if (operation->qubit_indices[i] == 1) {
+                new_layer->qubits[i] = 1;
+            }
         }
+
 
         qc->layers[qc->n_layers] = new_layer;
         qc->n_layers++;
@@ -52,15 +79,17 @@ void add_operation(qc_t* qc, operation_t* operation) {
 
         int start_index = 0;
 
-        // we find the last full layer and then search from there
+        // we find the last overlap layer and search from there
 
         for (int i = qc->n_layers - 1; i >= 0; i--) {
-            // all qubits in used
-            if (layer_full(qc->layers[i])) {
+
+            if (operation_layer_overlap(operation, qc->layers[i]) == 1) {
                 start_index = i;
                 break;
             }
         }
+
+        // printf("start_index: %d\n", start_index);
 
         for (int i = start_index; i < qc->n_layers; i++) {
             if (operation_layer_overlap(operation, qc->layers[i]) == 0) {
@@ -68,6 +97,8 @@ void add_operation(qc_t* qc, operation_t* operation) {
                 break;
             }
         }
+
+        // printf("layer_fit_index: %d for operation: %s\n", layer_fit_index, operation->gate->name);
 
         if (layer_fit_index == -1) {
             // create a new layer and add the operation to it
@@ -77,7 +108,9 @@ void add_operation(qc_t* qc, operation_t* operation) {
             new_layer->n_operations = 1;
             // add qubits operated on by the operation to the layer
             for (int i = 0; i < operation->n_qubit_indices; i++) {
-                new_layer->qubits[operation->qubit_indices[i]] = 1;
+                if (operation->qubit_indices[i] == 1) {
+                    new_layer->qubits[i] = 1;
+                }
             }
     
             qc->layers[qc->n_layers] = new_layer;
@@ -89,7 +122,9 @@ void add_operation(qc_t* qc, operation_t* operation) {
 
             // add qubits operated on by the operation to the layer
             for (int i = 0; i < operation->n_qubit_indices; i++) {
-                qc->layers[layer_fit_index]->qubits[operation->qubit_indices[i]] = 1;
+                if (operation->qubit_indices[i] == 1) {
+                    qc->layers[layer_fit_index]->qubits[i] = 1;
+                }
             }
         }
     }
@@ -98,28 +133,42 @@ void add_operation(qc_t* qc, operation_t* operation) {
 
 void x(qc_t* qc, int qubit_index) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
-    op->gate = &X_gate;
+    op->qubit_indices = (int*) calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
+
+    gate_t* x_gate = malloc(sizeof(gate_t));
+    new_gate(x_gate, 2, "X");
+    build_x_gate(x_gate);
+    op->gate = x_gate;
     add_operation(qc, op);
 }
 
 void h(qc_t* qc, int qubit_index) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
-    op->gate = &H_gate;
+    op->qubit_indices = (int*) calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+
+    op->n_qubit_indices = qc->n_qubits;
+
+    gate_t* h_gate = malloc(sizeof(gate_t));
+    new_gate(h_gate, 2, "H");
+    build_h_gate(h_gate);
+
+    op->gate = h_gate;
     add_operation(qc, op);
 }
 
 void z(qc_t* qc, int qubit_index) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->qubit_indices = (int*) calloc(1, qc->n_qubits * sizeof(int));
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
-    op->gate = &Z_gate;
+    op->qubit_indices = (int*) calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
+
+    gate_t* z_gate = malloc(sizeof(gate_t));
+    new_gate(z_gate, 2, "Z");
+    build_z_gate(z_gate);
+    op->gate = z_gate;
     add_operation(qc, op);
 }
 
@@ -134,16 +183,24 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
         target_index = t;
     }
 
-    new_gate(&CX_gate, 1 << (target_index - ctrl_index + 1), "CX");
-    build_controlled_single_qubit_gate(&X_gate,ctrl_index, target_index, &CX_gate);
+    gate_t* cx_gate = malloc(sizeof(gate_t));
+    new_gate(cx_gate, 1 << (target_index - ctrl_index + 1), "CX");
+
+    gate_t* x_gate = malloc(sizeof(gate_t));
+    new_gate(x_gate, 2, "X");
+    build_controlled_single_qubit_gate(x_gate,ctrl_index, target_index, cx_gate);
+
+    free_gate(x_gate);
+    free(x_gate);
 
     operation_t* CX_op = calloc(1, sizeof(operation_t));
-    CX_op->gate = &CX_gate;
-    CX_op->qubit_indices = malloc(sizeof(int) * (target_index - ctrl_index + 1));
+    CX_op->gate = cx_gate;
+    CX_op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
     for (int i = ctrl_index; i <= target_index; i++) {
-        CX_op->qubit_indices[i - ctrl_index] = i;
+        CX_op->qubit_indices[i] = 1;
     }
-    CX_op->n_qubit_indices = (target_index - ctrl_index + 1);
+    CX_op->n_qubit_indices = qc->n_qubits;
+
     add_operation(qc, CX_op);
 
     if (swapped) {
@@ -153,58 +210,111 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
 
 // requires qubit_2 > qubit_1
 void swap(qc_t* qc, int qubit_1, int qubit_2) {
-    new_gate(&SWAP_gate, 1 << (qubit_2 - qubit_1 + 1), "SWAP");
+    gate_t* swap_gate = malloc(sizeof(gate_t));
+    new_gate(swap_gate, 1 << (qubit_2 - qubit_1 + 1), "SWP");
     
-    for (int i = 0; i < SWAP_gate.ndim; i++) {
-        for (int j = 0; j < SWAP_gate.ndim; j++) {
-            SWAP_gate.elements[i][j] = (polar_t) {0, 0};
+    for (int i = 0; i < swap_gate->ndim; i++) {
+        for (int j = 0; j < swap_gate->ndim; j++) {
+            swap_gate->elements[i][j] = (polar_t) {0, 0};
         }
     }
 
-    build_swap_gate(&SWAP_gate, qubit_1, qubit_2);
+    build_swap_gate(swap_gate, qubit_1, qubit_2);
 
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->gate = &SWAP_gate;
-    op->qubit_indices = malloc(sizeof(int) * (qubit_2 - qubit_1 + 1));
+    op->gate = swap_gate;
+    op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
     for (int i = qubit_1; i <= qubit_2; i++) {
-        op->qubit_indices[i - qubit_1] = i;
+        op->qubit_indices[i] = 1;
     }
-    op->n_qubit_indices = (qubit_2 - qubit_1 + 1);
+
+    op->n_qubit_indices = qc->n_qubits;
     add_operation(qc, op);
 }
 
 void rx(qc_t* qc, int qubit_index, double theta) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->gate = &RX_gate;
-    new_gate(&RX_gate, 2, "RX");
-    build_rx_gate(&RX_gate, theta);
-    print_gate(&RX_gate);
-    op->qubit_indices = malloc(sizeof(int) * 1);
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
+    gate_t* rx_gate = malloc(sizeof(gate_t));
+    new_gate(rx_gate, 2, "RX");
+    build_rx_gate(rx_gate, theta);
+    op->gate = rx_gate;
+    op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
     add_operation(qc, op);
 }
 
 void ry(qc_t* qc, int qubit_index, double theta) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->gate = &RY_gate;
-    new_gate(&RY_gate, 2, "RY");
-    build_ry_gate(&RY_gate, theta);
-    op->qubit_indices = malloc(sizeof(int) * 1);
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
+    gate_t* ry_gate = malloc(sizeof(gate_t));
+    new_gate(ry_gate, 2, "RY");
+    build_ry_gate(ry_gate, theta);
+    op->gate = ry_gate;
+    op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
     add_operation(qc, op);
 }
 
 void rz(qc_t* qc, int qubit_index, double theta) {
     operation_t* op = calloc(1, sizeof(operation_t));
-    op->gate = &RZ_gate;
-    new_gate(&RZ_gate, 2, "RZ");
-    build_rz_gate(&RZ_gate, theta);
-    op->qubit_indices = malloc(sizeof(int) * 1);
-    op->qubit_indices[0] = qubit_index;
-    op->n_qubit_indices = 1;
+    gate_t* rz_gate = malloc(sizeof(gate_t));
+    new_gate(rz_gate, 2, "RZ");
+    build_rz_gate(rz_gate, theta);
+    op->gate = rz_gate;
+    op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
     add_operation(qc, op);
+}
+
+void phase_shift(qc_t* qc, int qubit_index, double theta) {
+
+    operation_t* op = calloc(1, sizeof(operation_t));
+    gate_t* ps_gate = malloc(sizeof(gate_t));
+    new_gate(ps_gate, 2, "P");
+
+    build_phase_shift_gate(ps_gate, theta);
+
+
+    op->gate = ps_gate;
+    op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
+    op->qubit_indices[qubit_index] = 1;
+    op->n_qubit_indices = qc->n_qubits;
+    add_operation(qc, op);
+}
+
+void qft(qc_t* qc, int start_qubit, int end_qubit) {
+    for (int i = start_qubit; i <= end_qubit; i++) {
+        h(qc, i);
+
+        for (int j = i + 1; j <= end_qubit; j++) {
+            // swap(qc, i, j);
+            gate_t* rz = malloc(sizeof(gate_t));
+            new_gate(rz, 2, "RZ");
+            rz->ndim = 2;
+            build_rz_gate(rz, 2 * PI / (1 << (j - i)));
+
+
+            gate_t* crz = malloc(sizeof(gate_t));
+            new_gate(crz, 1 << (j - i + 1), "CRZ");
+            build_controlled_single_qubit_gate(rz, i, j, crz);
+            crz->ndim = 1 << (j - i + 1);
+            
+            free_gate(rz);
+            free(rz);
+            
+            operation_t* op = calloc(1, sizeof(operation_t));
+            op->gate = crz;
+            op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
+            for (int k = i; k <= j; k++) {
+                op->qubit_indices[k] = 1;
+            }
+            op->n_qubit_indices = qc->n_qubits;
+            add_operation(qc, op);
+            // swap(qc, i, j);
+        }
+    }
 }
 
 void print_qc_amplitudes(qc_t* qc) {
@@ -214,6 +324,10 @@ void print_qc_amplitudes(qc_t* qc) {
 }
 
 void run_qc(qc_t* qc) {
+
+    gate_t* i_gate = malloc(sizeof(gate_t));
+    new_gate(i_gate, 2, "I");
+    build_i_gate(i_gate);
 
     // iterate through the layers and apply the operations in order
     for (int i = 0; i < qc->n_layers; i++) {
@@ -226,40 +340,44 @@ void run_qc(qc_t* qc) {
 
         int product_dim = 1; // product is currently product_dim * product_dim
 
+        
+
 
         while (qubit_index < qc->n_qubits) {
+
             if (qc->layers[i]->qubits[qubit_index] == 1) {
 
                 // find the operation that operates on qubit_index
                 operation_t* operation = NULL;
                 for (int j = 0; j < qc->layers[i]->n_operations; j++) {
-                    for (int k = 0; k < qc->layers[i]->operations[j]->n_qubit_indices; k++) {
-                        if (qc->layers[i]->operations[j]->qubit_indices[k] == qubit_index) {
-                            operation = qc->layers[i]->operations[j];
-                            break;
-                        }
+                    if (qc->layers[i]->operations[j]->qubit_indices[qubit_index] == 1) {
+                        operation = qc->layers[i]->operations[j];
+                        break;
                     }
                 }
+
                 if (operation != NULL) { // should never be null
                     // if product is null, we set product to the operation matrix
                     if (product == NULL) {
-                        // product = operation->gate->elements;
                         product = malloc(operation->gate->ndim * sizeof(polar_t*));
                         for (int k = 0; k < operation->gate->ndim; k++) {
                             product[k] = malloc(operation->gate->ndim * sizeof(polar_t));
                         }
                         copy_matrix(operation->gate->elements, product, operation->gate->ndim, operation->gate->ndim);
                         product_dim = operation->gate->ndim;
-                        qubit_index += operation->n_qubit_indices;
+                        qubit_index += (int) log2(operation->gate->ndim);
                     }  else {
                         // product is not null and we multiply the product with the operation
 
                         polar_t** new_product;
                         kronecker_product(product, operation->gate->elements, &new_product, product_dim, product_dim, operation->gate->ndim, operation->gate->ndim);
+                        for (int i = 0; i < product_dim; i++) {
+                            free(product[i]);
+                        }
                         free(product); // free the old product before setting it to the new pointer
                         product = new_product;
                         product_dim *= operation->gate->ndim;
-                        qubit_index += operation->n_qubit_indices;
+                        qubit_index += (int) log2(operation->gate->ndim);
                     }
                 }
             } else {
@@ -267,16 +385,20 @@ void run_qc(qc_t* qc) {
                     product = malloc(2 * sizeof(polar_t*));
                     for (int k = 0; k < 2; k++) {
                         product[k] = malloc(2 * sizeof(polar_t));
-                    }
+                    }                                    
 
-                    copy_matrix(I_gate.elements, product, 2, 2);
+                    copy_matrix(i_gate->elements, product, 2, 2);
+
                     product_dim = 2;
                     qubit_index++;
                 } else {
 
                     // multiply the product by the identity matrix
                     polar_t** new_product;
-                    kronecker_product(product, I_gate.elements, &new_product, product_dim, product_dim, 2, 2);
+                    kronecker_product(product, i_gate->elements, &new_product, product_dim, product_dim, 2, 2);
+                    for (int i = 0; i < product_dim; i++) {
+                        free(product[i]);
+                    }
                     free(product); // free the old product before setting it to the new pointer
                     product = new_product;
                     product_dim *= 2;
@@ -290,46 +412,83 @@ void run_qc(qc_t* qc) {
 
         for (int i = 0; i < product_dim; i++) {
             new_amps[i] = (polar_t) {qc->amps[i].r, qc->amps[i].theta};
-
         }
+
         matrix_vector_mult(product, qc->amps, new_amps, product_dim);
+
         // copy new_amps to qc->amps
         for (int i = 0; i < product_dim; i++) {
             qc->amps[i] = (polar_t) {new_amps[i].r, new_amps[i].theta};
         }
 
         free(new_amps);
+        for (int i = 0; i < product_dim; i++) {
+            free(product[i]);
+        }
         free(product);
     }
+
+    free_gate(i_gate);
+    free(i_gate);
 }
 
 void print_qc(qc_t* qc) {
     // print based on layers
 
+    int longest_operation_name = longest_operation_name_in_qc(qc);
+    int left_right_padding = 0;
+    if (longest_operation_name % 2 == 0) {
+        longest_operation_name++;
+    }
+
     for (int i = 0; i < qc->n_qubits; i++) { // n qubits lines of output
-        printf("|0>--");
+        printf("qubit %d |0>", i);
 
         for (int j = 0; j < qc->n_layers; j++) {
+
+            // int longest_operation_name = longest_operation_name_in_layer(qc->layers[j]);
             if (qc->layers[j]->qubits[i] == 1) {
                 // find the operation that operates on qubit i
                 char* gate_name = "X"; // default fallback
                 for (int k = 0; k < qc->layers[j]->n_operations; k++) {
-                    for (int l = 0; l < qc->layers[j]->operations[k]->n_qubit_indices; l++) {
-                        if (qc->layers[j]->operations[k]->qubit_indices[l] == i) {
-                            gate_name = qc->layers[j]->operations[k]->gate->name;
-                            break;
-                        }
+                    if (qc->layers[j]->operations[k]->qubit_indices[i] == 1) {
+                        gate_name = qc->layers[j]->operations[k]->gate->name;
+                        break;
                     }
                 }
-                printf("%s---", gate_name);
+                int padding = (longest_operation_name - strlen(gate_name)) / 2 + left_right_padding;
+                for (int k = 0; k < padding; k++) {
+                    printf("-");
+                }
+                printf("%s", gate_name);
+                for (int k = 0; k < padding; k++) {
+                    printf("-");
+                }
             } else {
-                printf("----");
+                for (int k = 0; k < longest_operation_name + 2 * left_right_padding; k++) {
+                    printf("-");
+                }
             }
+            printf("|");
         }
 
         printf("\n");
-
     }
+
+    printf("layer #");
+    int width = longest_operation_name + 2 * left_right_padding;
+    for (int j = 0; j < width / 2 + 4; j++) {
+        printf(" ");
+    }
+    // width of each layer is longest_operation_name + 2 * left_right_padding
+    // we print the layer number under each
+    for (int i = 0; i < qc->n_layers; i++) {
+        printf("%d", i);
+        for (int j = 0; j < (i >= 9 ? width - 1 : width); j++) {
+            printf(" ");
+        }
+    }
+    printf("\n");
 }
 
 void print_qc_layers(qc_t* qc) {
@@ -361,7 +520,7 @@ float _probability_of_qubit(qc_t* qc, int qubit_index) {
     // for a given qubit we sum the squares of the amplitudes of the states that have a 1 in the qubit
     float sum = 0;
     for (int i = 0; i < qc->n_amplitudes; i++) {
-        if (i & (1 << (qc->n_qubits - qubit_index - 1))) {
+        if (i & (1 << (qubit_index))) {
             sum += qc->amps[i].r * qc->amps[i].r;
         }
     }
@@ -373,5 +532,11 @@ void print_qc_probabilities(qc_t* qc) {
     for (int i = 0; i < qc->n_qubits; i++) {
         qc->probabilities[i] = _probability_of_qubit(qc, i);
         printf("Probability of qubit %d being 1: %f\n", i, qc->probabilities[i]);
+    }
+}
+
+void print_qc_amplitude_probabilities(qc_t* qc) {
+    for (int i = 0; i < qc->n_amplitudes; i++) {
+        printf("|%s> = %f exp(%f i) with probability %f\n", decimal_to_binary(i, qc->n_qubits), qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
     }
 }

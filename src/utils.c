@@ -2,16 +2,14 @@
 #include <math.h>
 #include "utils.h"
 #include <stdlib.h>
+#include <string.h>
+#include "layer.h"
+#include "qc.h"
 
-gate_t I_gate;
-gate_t X_gate;
-gate_t H_gate;
-gate_t Z_gate;
-gate_t CX_gate;
-gate_t SWAP_gate;
-gate_t RX_gate;
-gate_t RY_gate;
-gate_t RZ_gate;
+gate_t* I_gate;
+gate_t* X_gate;
+gate_t* H_gate;
+gate_t* Z_gate;
 
 void print_polar(polar_t p) {
     printf("(%f)exp(i[%f])\n", p.r, p.theta);
@@ -21,29 +19,6 @@ void print_cart(cart_t c) {
     printf("(%f) + (%f)i\n", c.a, c.b);
 }
 
-void init_gates() {
-    new_gate(&I_gate, 2, "I");
-    (I_gate.elements[0][0]) = (polar_t) {1, 0};
-    (I_gate.elements[1][1]) = (polar_t) {1, 0};
-    (I_gate.elements[0][1]) = (polar_t) {0, 0};
-    
-    new_gate(&X_gate, 2, "X");
-    (X_gate.elements[0][1]) = (polar_t) {1, 0};
-    (X_gate.elements[1][0]) = (polar_t) {1, 0};
-    
-    new_gate(&H_gate, 2, "H");
-    (H_gate.elements[0][0]) = (polar_t) {1/sqrt(2), 0};
-    (H_gate.elements[0][1]) = (polar_t) {1/sqrt(2), 0};
-    (H_gate.elements[1][0]) = (polar_t) {1/sqrt(2), 0}; 
-    (H_gate.elements[1][1]) = (polar_t) {-1/sqrt(2), 0};
-
-    new_gate(&Z_gate, 2, "Z");
-    (Z_gate.elements[0][0]) = (polar_t) {1, 0};
-    (Z_gate.elements[0][1]) = (polar_t) {0, 0};
-    (Z_gate.elements[1][0]) = (polar_t) {0, 0};
-    (Z_gate.elements[1][1]) = (polar_t) {-1, 0};
-
-}
 
 void copy_matrix(polar_t** src, polar_t** dst, int m, int n) {
     for (int i = 0; i < m; i++) {
@@ -56,9 +31,31 @@ void copy_matrix(polar_t** src, polar_t** dst, int m, int n) {
 void print_matrix(polar_t** matrix, int m, int n) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            print_polar(matrix[i][j]);
+            printf("%f exp(%f) ", matrix[i][j].r, matrix[i][j].theta);
+            // print_polar(matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int longest_operation_name_in_layer(layer_t* layer) {
+    int longest = 0;
+    for (int i = 0; i < layer->n_operations; i++) {
+        if (strlen(layer->operations[i]->gate->name) > longest) {
+            longest = strlen(layer->operations[i]->gate->name);
         }
     }
+    return longest;
+}
+
+int longest_operation_name_in_qc(qc_t* qc) {
+    int longest = 0;
+    for (int i = 0; i < qc->n_layers; i++) {
+        if (longest_operation_name_in_layer(qc->layers[i]) > longest) {
+            longest = longest_operation_name_in_layer(qc->layers[i]);
+        }
+    }
+    return longest;
 }
 
 void _generate_random_matrix(polar_t*** matrix, int m, int n) {
@@ -69,4 +66,12 @@ void _generate_random_matrix(polar_t*** matrix, int m, int n) {
             (*matrix)[i][j] = (polar_t) {rand() % 100, rand() % 100};
         }
     }
+}
+
+char* decimal_to_binary(int decimal, int length) {
+    char* binary = calloc(length, sizeof(char));
+    for (int i = 0; i < length; i++) {
+        binary[i] = (decimal & (1 << i)) ? '1' : '0';
+    }
+    return binary;
 }
