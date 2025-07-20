@@ -66,5 +66,11 @@ void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p);
 // raises a to the power of power and stores the result in b
 void matrix_power(polar_t** a, polar_t*** b, int n, int power);
 
+// conjugates a matrix and stores the result in b
+void matrix_conjugate(polar_t** a, polar_t*** b, int n);
+
+// transposes a square matrix of size n and stores the result in b
+void matrix_transpose(polar_t** a, polar_t*** b, int n);
+
 
 #endif

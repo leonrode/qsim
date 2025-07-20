@@ -60,6 +60,10 @@ polar_t polar_mult(polar_t a, polar_t b) {
     return reduce_polar(prod);
 }
 
+polar_t polar_conjugate(polar_t a) {
+    return (polar_t) {a.r, -a.theta};
+}
+
 /**
  * static polar_t A_UNRED = {1, 3*PI + 0.5};
  * static polar_t A_RED = {1, 3.6415926536};
@@ -199,4 +203,31 @@ void matrix_power(polar_t** a, polar_t*** b, int n, int power) {
         free(current_result[i]);
     }
     free(current_result);
+}
+
+void matrix_conjugate(polar_t** a, polar_t*** b, int n) {
+
+    *b = calloc(n, sizeof(polar_t*));
+    for (int i = 0; i < n; i++) {
+        (*b)[i] = calloc(n, sizeof(polar_t));
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            (*b)[i][j] = polar_conjugate(a[i][j]);
+        }
+    }
+}
+
+void matrix_transpose(polar_t** a, polar_t*** b, int n) {
+    *b = calloc(n, sizeof(polar_t*));
+    for (int i = 0; i < n; i++) {
+        (*b)[i] = calloc(n, sizeof(polar_t));
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            (*b)[j][i] = a[i][j];
+        }
+    }
 }

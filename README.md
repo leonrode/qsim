@@ -69,6 +69,7 @@ qsim
 2. `leaks` for testing for memory leaks
 3. building dynamic structures in C
 4. devising and implementing a greedy layering algorithm
+5. endianness and how it relates to building the quantum circuits (qsim uses little-endian)
 
 ### Progress Tracking
 

@@ -27,4 +27,6 @@ void build_ry_gate(gate_t* output, double theta);
 void build_rz_gate(gate_t* output, double theta);
 void build_phase_shift_gate(gate_t* output, double theta);
 
+void build_dagger_gate(gate_t* input, gate_t* output);
+
 #endif

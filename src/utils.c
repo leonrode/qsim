@@ -31,7 +31,7 @@ void copy_matrix(polar_t** src, polar_t** dst, int m, int n) {
 void print_matrix(polar_t** matrix, int m, int n) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%f exp(%f) ", matrix[i][j].r, matrix[i][j].theta);
+            printf("%.2f exp(%.2f) ", matrix[i][j].r, matrix[i][j].theta);
             // print_polar(matrix[i][j]);
         }
         printf("\n");

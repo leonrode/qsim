@@ -215,3 +215,29 @@ void build_phase_shift_gate(gate_t* output, double theta) {
     output->elements[1][0] = (polar_t) {0, 0};
     output->elements[1][1] = (polar_t) {1, theta};
 }
+
+void build_dagger_gate(gate_t* input, gate_t* output) {
+
+    polar_t** conjugate = NULL;
+    matrix_conjugate(input->elements, &conjugate, input->ndim);
+
+    polar_t** transpose = NULL;
+    matrix_transpose(conjugate, &transpose, input->ndim);
+
+    // copy transpose into output
+    for (int i = 0; i < input->ndim; i++) {
+        for (int j = 0; j < input->ndim; j++) {
+            output->elements[i][j] = transpose[i][j];
+        }
+    }
+
+    for (int i = 0; i < input->ndim; i++) {
+        free(conjugate[i]);
+    }
+    free(conjugate);
+
+    for (int i = 0; i < input->ndim; i++) {
+        free(transpose[i]);
+    }
+    free(transpose);
+}
