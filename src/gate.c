@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "utils.h"
 
-/**
- * Initialize gate struct with n dimensions i.e. n x n matrix
- */
 void new_gate(gate_t* gate, int n, char* name) {
     gate->ndim = n;
     gate->elements = malloc(n * sizeof(polar_t*));
@@ -19,45 +17,22 @@ void new_gate(gate_t* gate, int n, char* name) {
 }
 
 void free_gate(gate_t* gate) {
-    for (int i = 0; i < gate->ndim; i++) {
-        free(gate->elements[i]);
-    }
-    
-    free(gate->elements);
+    free_matrix(gate->elements, gate->ndim);
+    free(gate);
 }
 
 void copy_gate(gate_t* src, gate_t* dest) {
     dest->ndim = src->ndim;
     dest->name = src->name;
-    dest->elements = malloc(src->ndim * sizeof(polar_t*));
-    for (int i = 0; i < src->ndim; i++) {
-        dest->elements[i] = malloc(src->ndim * sizeof(polar_t));
-        for (int j = 0; j < src->ndim; j++) {
-            dest->elements[i][j] = src->elements[i][j];
-        }
-    }
+
+    copy_matrix(src->elements, dest->elements, src->ndim, src->ndim);
 }
 
 void print_gate(gate_t* gate) {
     printf("Gate: %s\n", gate->name);
-    for (int r = 0; r < gate->ndim; r++) {
-        polar_t* row = gate->elements[r];
-
-        for (int c = 0; c < gate->ndim; c++) {
-            printf("(%f)exp([%f]i) ", (row + c)->r, (row + c)->theta);
-        }
-        printf("\n");
-    }
+    print_matrix(gate->elements, gate->ndim, gate->ndim);
 }
 
-
-void fill_with_zeros(gate_t* gate) {
-    for (int i = 0; i < gate->ndim; i++) {
-        for (int j = 0; j < gate->ndim; j++) {
-            (gate->elements[i][j]) = (polar_t) {0, 0};
-        }
-    }
-}
 
 void build_i_gate(gate_t* gate) {
     gate->elements[0][0] = (polar_t) {1, 0};
@@ -87,13 +62,7 @@ void build_z_gate(gate_t* gate) {
     gate->elements[1][1] = (polar_t) {-1, 0};
 }
 
-
-
-
-
-
 void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target_qubit, gate_t* output) {
-
     // number of qubits between the control and target
     // e.g. for CX[0, 1] we have n = 0
     int n = target_qubit - control_qubit - 1;
@@ -107,9 +76,9 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
     }
 
     // we compute kronecker product of I_(N/4) and U
-    
     // this will be of size N/2 x N/2
 
+    // build elements of I_(N/4) first
     polar_t** IN_4 = malloc(N/4 * sizeof(polar_t*));
     for (int i = 0; i < N/4; i++) {
         IN_4[i] = malloc(N/4 * sizeof(polar_t));
@@ -119,7 +88,6 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
         }
     }
 
-    // we init product of size N/2
     polar_t** product = NULL;  // let kronecker_product allocate it
 
     kronecker_product(IN_4, u->elements, &product, N/4, N/4, u->ndim, u->ndim);
@@ -131,20 +99,11 @@ void build_controlled_single_qubit_gate(gate_t* u, int control_qubit, int target
         }
     }
 
-
-    for (int i = 0; i < N/4; i++) {
-        free(IN_4[i]);
-    }
-    free(IN_4);
-    for (int i = 0; i < N/2; i++) {
-        free(product[i]);
-    }
-    free(product);
-
+    free_matrix(IN_4, N/4);
+    free_matrix(product, N/2);
 }
 
 void build_swap_gate(gate_t* output, int qubit_1, int qubit_2) {
-
     // the size of this gate is 2^(qubit_2 - qubit_1 + 1)
     if (qubit_1 > qubit_2) { // account for the case where qubit_1 > qubit_2
         int t = qubit_1;
@@ -217,7 +176,6 @@ void build_phase_shift_gate(gate_t* output, double theta) {
 }
 
 void build_dagger_gate(gate_t* input, gate_t* output) {
-
     polar_t** conjugate = NULL;
     matrix_conjugate(input->elements, &conjugate, input->ndim);
 
@@ -225,19 +183,8 @@ void build_dagger_gate(gate_t* input, gate_t* output) {
     matrix_transpose(conjugate, &transpose, input->ndim);
 
     // copy transpose into output
-    for (int i = 0; i < input->ndim; i++) {
-        for (int j = 0; j < input->ndim; j++) {
-            output->elements[i][j] = transpose[i][j];
-        }
-    }
+    copy_matrix(transpose, output->elements, input->ndim, input->ndim);
 
-    for (int i = 0; i < input->ndim; i++) {
-        free(conjugate[i]);
-    }
-    free(conjugate);
-
-    for (int i = 0; i < input->ndim; i++) {
-        free(transpose[i]);
-    }
-    free(transpose);
+    free_matrix(conjugate, input->ndim);    
+    free_matrix(transpose, input->ndim);
 }

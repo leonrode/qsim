@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <math.h>
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -39,7 +38,7 @@ void print_matrix(polar_t** matrix, int m, int n) {
 }
 
 int longest_operation_name_in_layer(layer_t* layer) {
-    int longest = 0;
+    unsigned longest = 0;
     for (int i = 0; i < layer->n_operations; i++) {
         if (strlen(layer->operations[i]->gate->name) > longest) {
             longest = strlen(layer->operations[i]->gate->name);

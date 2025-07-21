@@ -13,7 +13,6 @@ cart_t cart_add(cart_t a, cart_t b) {
     return sum;
 }
 
-
 cart_t cart_mult(cart_t a, cart_t b) {
     cart_t product = {a.a * b.a - a.b * b.b, a.a * b.b + b.a * a.b};
 
@@ -64,13 +63,8 @@ polar_t polar_conjugate(polar_t a) {
     return (polar_t) {a.r, -a.theta};
 }
 
-/**
- * static polar_t A_UNRED = {1, 3*PI + 0.5};
- * static polar_t A_RED = {1, 3.6415926536};
- */
 polar_t reduce_polar(polar_t a) {
     // puts a's angle between [0, 2pi)
-
     real_t theta_effective = a.theta;
     if (theta_effective < 0) {
     theta_effective += 2 * PI;
@@ -100,7 +94,6 @@ void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n) {
 // stores result in c with dimension (m * p) * (n * q)
 // allocated here
 void kronecker_product(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p, int q) {
-
     // we set c to a 2D array of size m * p * n * q
     *c = calloc(m * p, sizeof(polar_t*));
     for (int i = 0; i < m * p; i++) {
@@ -132,7 +125,6 @@ void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n) {
 }
 
 void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p) {
-
     // multiply the matrices
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < p; j++) {
@@ -145,16 +137,6 @@ void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p) {
 }
 
 void matrix_power(polar_t** a, polar_t*** b, int n, int power) {
-
-    // calloc b
-    *b = calloc(n, sizeof(polar_t*));
-    for (int i = 0; i < n; i++) {
-        (*b)[i] = calloc(n, sizeof(polar_t));
-    }
-
-    // --- For power > 1, iterative multiplication ---
-
-    // 1. Initialize 'current_result' with 'a' (A^1)
     polar_t** current_result = calloc(n, sizeof(polar_t*));
     for (int i = 0; i < n; i++) {
         current_result[i] = calloc(n, sizeof(polar_t));
@@ -163,50 +145,25 @@ void matrix_power(polar_t** a, polar_t*** b, int n, int power) {
         }
     }
 
-    // 2. Create a temporary matrix to store intermediate products
     polar_t** temp_product = calloc(n, sizeof(polar_t*));
     for (int i = 0; i < n; i++) {
         temp_product[i] = calloc(n, sizeof(polar_t));
     }
-
-    // Multiply 'current_result' by 'a' for (power - 1) times
-    // (Loop starts from 2 because current_result already holds A^1)
     for (int i = 2; i <= power; i++) {
-        // Calculate current_result * a and store in temp_product
-        // Use matrix_mult(current_matrix, matrix_to_multiply_by, &result_matrix_ptr, ...)
+
         matrix_mult(current_result, a, &temp_product, n, n, n);
 
-
-        // Copy the content of temp_product back to current_result for the next iteration
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                current_result[i][j] = temp_product[i][j];
-            }
-        }
+        copy_matrix(temp_product, current_result, n, n);
     }
 
 
-    // Copy the final result from current_result to the output matrix 'b'
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            (*b)[i][j] = current_result[i][j];
-        }
-    }
+    copy_matrix(current_result, *b, n, n);
 
-    // Clean up temporary matrices
-    for (int i = 0; i < n; i++) {
-        free(temp_product[i]);
-    }
-    free(temp_product);
-
-    for (int i = 0; i < n; i++) {
-        free(current_result[i]);
-    }
-    free(current_result);
+    free_matrix(temp_product, n);
+    free_matrix(current_result, n);
 }
 
 void matrix_conjugate(polar_t** a, polar_t*** b, int n) {
-
     *b = calloc(n, sizeof(polar_t*));
     for (int i = 0; i < n; i++) {
         (*b)[i] = calloc(n, sizeof(polar_t));
@@ -230,4 +187,11 @@ void matrix_transpose(polar_t** a, polar_t*** b, int n) {
             (*b)[j][i] = a[i][j];
         }
     }
+}
+
+void free_matrix(polar_t** matrix, int m) {
+    for (int i = 0; i < m; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
 }

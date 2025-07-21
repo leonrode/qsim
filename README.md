@@ -2,13 +2,13 @@
 
 ## Introduction
 
-qsim is a small quantum circuit simulator written in C.
+qsim is a quantum circuit simulator written in C.
 
 The user can
 
 1. define a quantum circuit via application of gates
 2. compute the state vector after applying the circuit
-3. calculate the probabilty of the state of a qubit after measurement
+3. calculate the probabilty of output states (across all qubits, or a subrange)
 4. visualize the circuit in the terminal
 
 ### To use
@@ -16,6 +16,39 @@ The user can
 3. edit `main.c` to create your circuit
 2. run `make`
 4. run `./qsim`
+
+## Example: Quantum Phase Estimation
+
+qsim is able to run the canonical [Quantum Phase Estimation](https://en.wikipedia.org/wiki/Quantum_phase_estimation_algorithm) algorithm. It does so by computing a forward [Quantum Fourier Transform](https://en.wikipedia.org/wiki/Quantum_Fourier_transform) and appending its adjoint to the rest of the circuit. See `qpe()` within `src/main.c` to see how to build this circuit.
+
+The 3-qubit quantum phase estimation circuit looks like this:
+
+```
+qubit 0 |0>-H-|CPS|---|---|SWP|---|---|---|---|---|SWP|CPS|SWP|SWP|CPS|SWP|-H-|
+qubit 1 |0>-H-|CPS|CPS|---|SWP|---|SWP|CPS|SWP|-H-|SWP|CPS|SWP|SWP|CPS|SWP|---|
+qubit 2 |0>-H-|CPS|CPS|CPS|SWP|-H-|SWP|CPS|SWP|---|SWP|CPS|SWP|---|---|---|---|
+qubit 3 |0>-X-|CPS|CPS|CPS|---|---|---|---|---|---|---|---|---|---|---|---|---|
+layer #     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  
+```
+
+Here, qubit 3 is the qubit representing the eigenvector of the unitary U, and qubits 0 - 2 are the estimation qubits. In this example, U is the phase shift operation by `+pi / 4`.
+
+Layers 1-3 are the `C`ontrolled `P`hase `S`hift of U^4, U^2, and U, respectively (my formatter doesn't distinguish between control and target). Layers 4-16 are the inverse QFT. Measuring only qubits 0 - 2, we get the following results:
+
+```
+Measuring qubits 0 to 2: |q0q1q2>
+|0> = |000> = probability 0.000000 of being 1
+|1> = |001> = probability 1.000000 of being 1
+|2> = |010> = probability 0.000000 of being 1
+|3> = |011> = probability 0.000000 of being 1
+|4> = |100> = probability 0.000000 of being 1
+|5> = |101> = probability 0.000000 of being 1
+|6> = |110> = probability 0.000000 of being 1
+|7> = |111> = probability 0.000000 of being 1
+```
+
+We see that the state `|001>` was measured with probability 1. The binary numeral `0b0.001` is equal to 1/8 in decimal, and corresponds with `theta = 1 / 8`. Note that QPE finds the value of `theta` where `2 * pi * theta` equals the phase. So our QPE execution gave a phase of `2 * pi * (1 / 8)`, or `pi / 4`, as expected.
+
 
 ## Hierarchy
 
@@ -67,33 +100,15 @@ qsim
 
 1. `make` for building and then cleaning the repository
 2. `leaks` for testing for memory leaks
+3. `lldb` for tracing double-frees
 3. building dynamic structures in C
 4. devising and implementing a greedy layering algorithm
 5. endianness and how it relates to building the quantum circuits (qsim uses little-endian)
 
-### Progress Tracking
-
-- [x] a lot of linear algebra
-- [x] implement a qubit
-- [x] multiqubit quantum circuits
-    - [x] 2^n statevector
-- [x] implement a quantum gate
-    - [x] application of quantum gate on qubit
-    - [x] application of a quantum gate on subset of circuits' qubits
-        - achieved by building 2^n x 2^n matrix on a layer-by-layer basis
-- [x] multi-qubit state
-- [x] building quantum circuits
-    - [x] circuit layering
-        - involves a greedy algorithm to group the operations by layer
-    - [ ] visualizing quantum circuits in stdout
-        - [ ] visualize control/target qubit
-- [x] running quantum circuits
-    - [x] final statevector
-    - [x] qubit probabilities
-- [x] run Deutsch-Josza 
-    - 2-qubit case with CX for the balanced function unitary and I for constant function unitary
-
 ## References
 
-- https://en.wikipedia.org/wiki/Kronecker_product
-- https://quantumcomputing.stackexchange.com/questions/9614/how-to-interpret-a-4-qubit-quantum-circuit-as-a-matrix (matrix representation of controlled-U gate)
+- [Kronecker Product](https://en.wikipedia.org/wiki/Kronecker_product)
+- [Matrix Representation of controlled-U gate](https://quantumcomputing.stackexchange.com/questions/9614/how-to-interpret-a-4-qubit-quantum-circuit-as-a-matrix)
+- [QFT](https://en.wikipedia.org/wiki/Quantum_Fourier_transform)
+- [QPE](https://pennylane.ai/qml/demos/tutorial_qpe)
+- [Quirk Quantum Circuit Simulator](https://algassert.com/quirk#circuit=%7B%22cols%22:%5B%5D%7D)

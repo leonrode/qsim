@@ -2,14 +2,11 @@
 #define UTILS_H
 
 #include "qmath.h"
-#include "gate.h"
 #include "layer.h"
 #include "qc.h"
 
 void print_polar(polar_t p);
 void print_cart(cart_t c);
-
-
 
 // src and dest are m x n matrices
 void copy_matrix(polar_t** src, polar_t** dst, int m, int n);

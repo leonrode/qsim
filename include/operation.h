@@ -10,5 +10,6 @@ typedef struct {
 } operation_t;
 
 void free_operation(operation_t* operation);
+// copies the contents of src into dest, assuming dest is already allocated
 void copy_operation(operation_t* src, operation_t* dest);
 #endif 

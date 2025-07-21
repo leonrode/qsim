@@ -17,6 +17,7 @@ void free_layer(layer_t* layer) {
         free(layer->operations[i]);
     }
     free(layer->operations);
+    free(layer);
 }
 
 int operation_layer_overlap(operation_t* operation, layer_t* layer) {

@@ -16,8 +16,7 @@ typedef enum {
 } bool_t;
 
 // here because it is useful for intermediate operations
-// but i think we'll rely on doing all 
-// out-facing computations in polar 
+// out-facing computations in polar form
 typedef struct {
     real_t a;
     real_t b;
@@ -28,49 +27,66 @@ typedef struct {
     real_t theta;
 } polar_t; // re^(i*theta)
 
-typedef union {
-    polar_t p;
-    cart_t c;
-} complex_t; // complex number is either polar or cartesian
-
+// compares two cartesian numbers
 bool_t cart_equal(cart_t a, cart_t b);
+
+// adds two cartesian numbers
 cart_t cart_add(cart_t a, cart_t b);
+
+// multiplies two cartesian numbers
 cart_t cart_mult(cart_t a, cart_t b);
 
+// converts a cartesian number to a polar number
 polar_t cart_to_polar(cart_t a);
+
+// converts a polar number to a cartesian number
 cart_t polar_to_cart(polar_t a);
 
+// compares two polar numbers
 bool_t polar_equal(polar_t a, polar_t b);
+
+// adds two polar numbers
 polar_t polar_add(polar_t a, polar_t b);
+
+// multiplies two polar numbers
 polar_t polar_mult(polar_t a, polar_t b);
 
+// reduces a polar number to the range [0, 2*pi)
 polar_t reduce_polar(polar_t a);
 
+// compares two real numbers
 bool_t equals(real_t a, real_t b);
 
+// multiplies a vector by a matrix
 // assumes a is n * n, b is n * 1, c is n * 1
+// does not allocate c
 void matrix_vector_mult(polar_t** a, polar_t* b, polar_t* c, int n);
 
 // a is m * n, b is p * q, c is (m * p) * (n * q) matrix
-// c will be dynamically allocated and stored at the pointer c
+// c will be dynamically allocated
 void kronecker_product(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p, int q);
 
 // a and b are m * n matrices, c is m * n matrix
+// does not allocate c
 void matrix_add(polar_t** a, polar_t** b, polar_t** c, int m, int n);
 
 // a is m * n, b is n * p, and c is m * p matrix
-// that will be dynamically allocated and stored
-// at the pointer c
+// does not allocate c
 void matrix_mult(polar_t** a, polar_t** b, polar_t*** c, int m, int n, int p);
 
 // raises a to the power of power and stores the result in b
 void matrix_power(polar_t** a, polar_t*** b, int n, int power);
 
 // conjugates a matrix and stores the result in b
+// allocates b
 void matrix_conjugate(polar_t** a, polar_t*** b, int n);
 
 // transposes a square matrix of size n and stores the result in b
+// allocates b
 void matrix_transpose(polar_t** a, polar_t*** b, int n);
+
+// frees a matrix
+void free_matrix(polar_t** matrix, int m);
 
 
 #endif

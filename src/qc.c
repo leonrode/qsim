@@ -26,7 +26,6 @@ void free_qc(qc_t* qc) {
     free(qc->amps);
     for (int i = 0; i < qc->n_layers; i++) {
         free_layer(qc->layers[i]);
-        free(qc->layers[i]);
     }
     free(qc->probabilities);
     free(qc->layers);
@@ -34,12 +33,9 @@ void free_qc(qc_t* qc) {
 }
 
 void adjoint_qc(qc_t* qc_in, qc_t* qc_out) {
-
     // we copy everything in reverse order
     for (int i = qc_in->n_layers - 1; i >= 0; i--) {
-        // we need to copy the layer to the output qc
-        layer_t* new_layer = malloc(sizeof(layer_t));
-        init_layer(new_layer, qc_in->n_qubits);
+        // dagger each operation in each layer and copy into the output qc
         for (int j = 0; j < qc_in->layers[i]->n_operations; j++) {
             operation_t* new_operation = malloc(sizeof(operation_t));
             copy_operation(qc_in->layers[i]->operations[j], new_operation);
@@ -72,25 +68,19 @@ void add_operation(qc_t* qc, operation_t* operation) {
             }
         }
 
-
         qc->layers[qc->n_layers] = new_layer;
         qc->n_layers++;
     } else {
         int layer_fit_index = -1;
-
         int start_index = 0;
 
         // we find the last overlap layer and search from there
-
         for (int i = qc->n_layers - 1; i >= 0; i--) {
-
             if (operation_layer_overlap(operation, qc->layers[i]) == 1) {
                 start_index = i;
                 break;
             }
         }
-
-        // printf("start_index: %d\n", start_index);
 
         for (int i = start_index; i < qc->n_layers; i++) {
             if (operation_layer_overlap(operation, qc->layers[i]) == 0) {
@@ -98,8 +88,6 @@ void add_operation(qc_t* qc, operation_t* operation) {
                 break;
             }
         }
-
-        // printf("layer_fit_index: %d for operation: %s\n", layer_fit_index, operation->gate->name);
 
         if (layer_fit_index == -1) {
             // create a new layer and add the operation to it
@@ -193,7 +181,6 @@ void cx(qc_t* qc, int ctrl_index, int target_index) {
     build_controlled_single_qubit_gate(x_gate,ctrl_index, target_index, cx_gate);
 
     free_gate(x_gate);
-    free(x_gate);
 
     operation_t* CX_op = calloc(1, sizeof(operation_t));
     CX_op->gate = cx_gate;
@@ -271,14 +258,10 @@ void rz(qc_t* qc, int qubit_index, double theta) {
 }
 
 void phase_shift(qc_t* qc, int qubit_index, double theta) {
-
     operation_t* op = calloc(1, sizeof(operation_t));
     gate_t* ps_gate = malloc(sizeof(gate_t));
     new_gate(ps_gate, 2, "P");
-
     build_phase_shift_gate(ps_gate, theta);
-
-
     op->gate = ps_gate;
     op->qubit_indices = calloc(qc->n_qubits, sizeof(int));
     op->qubit_indices[qubit_index] = 1;
@@ -291,14 +274,9 @@ void qft(qc_t* qc, int start_qubit, int end_qubit) {
         h(qc, i);
 
         for (int j = i + 1; j <= end_qubit; j++) {
-
-
             gate_t* ps = malloc(sizeof(gate_t));
             new_gate(ps, 2, "PS");
             build_phase_shift_gate(ps, PI / (1 << (j - i)));
-
-            // printf("Phase shift gate on qubit %d controlled by qubit %d with phase %f\n", i, j, PI / (1 << (j - i)));
-            print_matrix(ps->elements, ps->ndim, ps->ndim);
 
             gate_t* crps = malloc(sizeof(gate_t));
             new_gate(crps, 1 << (j - i + 1), "CPS");
@@ -315,8 +293,8 @@ void qft(qc_t* qc, int start_qubit, int end_qubit) {
             swap(qc, i, j);
             add_operation(qc, op);
             swap(qc, i, j);
+
             free_gate(ps);
-            free(ps);
         }
     }
 
@@ -333,7 +311,6 @@ void print_qc_amplitudes(qc_t* qc) {
 }
 
 void run_qc(qc_t* qc) {
-
     gate_t* i_gate = malloc(sizeof(gate_t));
     new_gate(i_gate, 2, "I");
     build_i_gate(i_gate);
@@ -348,9 +325,6 @@ void run_qc(qc_t* qc) {
         polar_t** product = NULL;
 
         int product_dim = 1; // product is currently product_dim * product_dim
-
-        
-
 
         while (qubit_index < qc->n_qubits) {
 
@@ -380,10 +354,7 @@ void run_qc(qc_t* qc) {
 
                         polar_t** new_product;
                         kronecker_product(product, operation->gate->elements, &new_product, product_dim, product_dim, operation->gate->ndim, operation->gate->ndim);
-                        for (int i = 0; i < product_dim; i++) {
-                            free(product[i]);
-                        }
-                        free(product); // free the old product before setting it to the new pointer
+                        free_matrix(product, product_dim);
                         product = new_product;
                         product_dim *= operation->gate->ndim;
                         qubit_index += (int) log2(operation->gate->ndim);
@@ -401,27 +372,17 @@ void run_qc(qc_t* qc) {
                     product_dim = 2;
                     qubit_index++;
                 } else {
-
                     // multiply the product by the identity matrix
                     polar_t** new_product;
                     kronecker_product(product, i_gate->elements, &new_product, product_dim, product_dim, 2, 2);
-                    for (int i = 0; i < product_dim; i++) {
-                        free(product[i]);
-                    }
-                    free(product); // free the old product before setting it to the new pointer
+                    free_matrix(product, product_dim);
                     product = new_product;
                     product_dim *= 2;
                     qubit_index++;
                 }
-
             }            
         }
-        // print the final product of the layer
 
-        printf("Final product of layer %d:\n", i);
-        print_matrix(product, product_dim, product_dim);
-        printf("\n");
-        
         // multiply the amps by the product
         polar_t* new_amps = calloc(product_dim, sizeof(polar_t));
 
@@ -436,21 +397,15 @@ void run_qc(qc_t* qc) {
             qc->amps[i] = (polar_t) {new_amps[i].r, new_amps[i].theta};
         }
 
-
-        free(new_amps);
-        for (int i = 0; i < product_dim; i++) {
-            free(product[i]);
-        }
-        free(product);
+        free(new_amps);        
+        free_matrix(product, product_dim);
     }
 
     free_gate(i_gate);
-    free(i_gate);
 }
 
 void print_qc(qc_t* qc) {
     // print based on layers
-
     int longest_operation_name = longest_operation_name_in_qc(qc);
     int left_right_padding = 0;
     if (longest_operation_name % 2 == 0) {
@@ -516,41 +471,6 @@ void print_qc_layers(qc_t* qc) {
     }
 }
 
-void _remove_global_phase(qc_t* qc) {
-    // we need to find the first non-zero amplitude
-    for (int i = 0; i < qc->n_amplitudes; i++) {
-        if (qc->amps[i].r != 0) {
-
-            double phase = qc->amps[i].theta;
-            // we need to remove the global phase
-            for (int j = 0; j < qc->n_amplitudes; j++) {
-                qc->amps[j].theta -= phase;
-            }
-            break;
-        }
-    }
-}
-
-float _probability_of_qubit(qc_t* qc, int qubit_index) {
-
-    // for a given qubit we sum the squares of the amplitudes of the states that have a 1 in the qubit
-    float sum = 0;
-    for (int i = 0; i < qc->n_amplitudes; i++) {
-        if (i & (1 << (qc->n_qubits - qubit_index - 1))) {
-            sum += qc->amps[i].r * qc->amps[i].r;
-        }
-    }
-    return sum;
-}
-
-
-void print_qc_probabilities(qc_t* qc) {
-    for (int i = 0; i < qc->n_qubits; i++) {
-        qc->probabilities[i] = _probability_of_qubit(qc, i);
-        printf("Probability of qubit %d being 1: %f\n", i, qc->probabilities[i]);
-    }
-}
-
 void print_qc_amplitude_probabilities(qc_t* qc) {
     printf("|");
     for (int i = 0; i < qc->n_qubits; i++) {
@@ -558,7 +478,9 @@ void print_qc_amplitude_probabilities(qc_t* qc) {
     }
     printf(">\n");
     for (int i = 0; i < qc->n_amplitudes; i++) {
-        printf("|%d> = |%s> = %f exp(%f i) with probability %f of being 1\n", i, decimal_to_binary(i, qc->n_qubits), qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
+        char* binary = decimal_to_binary(i, qc->n_qubits);
+        printf("|%d> = |%s> = %f exp(%f i) with probability %f of being 1\n", i, binary, qc->amps[i].r, qc->amps[i].theta, qc->amps[i].r * qc->amps[i].r);
+        free(binary);
     }
 }
 
@@ -580,13 +502,9 @@ void print_qc_amplitude_probabilities_range(qc_t* qc, int start_qubit_index, int
                 sum += qc->amps[j].r * qc->amps[j].r;
             }
         }
-
  
-        printf("|%d> = |%s> = probability %f of being 1\n", i, decimal_to_binary(i, end_qubit_index - start_qubit_index + 1), sum);
-
-
-        }
-        // then we iterate through the amplitudes and 
-    
-
+        char* binary = decimal_to_binary(i, end_qubit_index - start_qubit_index + 1);   
+        printf("|%d> = |%s> = probability %f of being 1\n", i, binary, sum);
+        free(binary);
+    }
 }
