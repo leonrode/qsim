@@ -64,7 +64,15 @@ void qpe() {
 
 
 int main() {
-    qpe();
+    // qpe();
+
+    qc_t* qc = malloc(sizeof(qc_t));
+    init_qc(qc, 1);
+
+    ry(qc, 0, 0.952);
+    run_qc(qc);
+    print_qc(qc);
+    print_qc_amplitude_probabilities_range(qc, 0, 0);
     return EXIT_SUCCESS;
 }
 

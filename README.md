@@ -8,7 +8,7 @@ The user can
 
 1. define a quantum circuit via application of gates
 2. compute the state vector after applying the circuit
-3. calculate the probabilty of output states (across all qubits, or a subrange)
+3. calculate the probability of output states (across all qubits, or a subrange)
 4. visualize the circuit in the terminal
 
 ### To use
@@ -62,7 +62,7 @@ Each operation is a gate acting upon one or more qubits. For some gates, such as
 
 ![layering in qsim](/public/layers.png)
 
-As operations are added to the circuit, they are grouped into layers, which reprsent a logical parallelization of the application of the gates. The grouping mechanism searches for an "empty slot" to place the new gate into, and creates a new one if one doesn't exist.
+As operations are added to the circuit, they are grouped into layers, which represent a logical parallelization of the application of the gates. The grouping mechanism searches for an "empty slot" to place the new gate into, and creates a new one if one doesn't exist.
 
 ## Running the circuit
 
